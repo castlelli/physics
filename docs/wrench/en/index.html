@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reduction of a force system</title>
+  <meta name="description" content="A system of forces on a rigid body, live in 3D: resultant, moments, invariant, classification, central axis and minimum moment.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="Reduction of a force system">
+  <meta property="og:description" content="Resultant, moments, invariant and central axis of a force system, in 3D.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2313161b'/%3E%3Cpath d='M5 27L27 5' stroke='%2334b37f' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M10 22l9-9' stroke='%23e8763e' stroke-width='3.4' stroke-linecap='round'/%3E%3Cpath d='M16 13l3 0 0 3' stroke='%23e8763e' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="alternate" hreflang="pt-BR" href="https://castlelli.github.io/physics/wrench/">
+  <link rel="alternate" hreflang="en" href="https://castlelli.github.io/physics/wrench/en/">
+  <link rel="preload" href="../fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../style.css?v=1">
+  <script>
+    // Applies a saved theme before first paint.
+    try { const saved = localStorage.getItem("theme"); if (saved) document.documentElement.dataset.theme = saved; } catch (error) {}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#lab">Skip to the lab</a>
+
+  <header class="nav">
+    <a class="back" href="../../" aria-label="Back to the physics projects"><span aria-hidden="true">←</span><span class="back-label">Physics</span></a>
+    <a class="brand" href="#topo">Force system</a>
+    <nav aria-label="Sections">
+      <a href="#lab">Lab</a>
+      <a href="#eixo">Central axis</a>
+      <a href="#minimo">Minimum moment</a>
+      <a href="#verificacao">Verification</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="button ghost" href="../" hreflang="pt-BR" lang="pt-BR" aria-label="Português">PT</a>
+      <button class="button ghost" type="button" data-theme-toggle aria-label="Switch between light and dark theme">Theme</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="topo">
+      <div class="hero-text">
+        <p class="eyebrow">Physics, statics</p>
+        <h1>A system of forces, <em>reduced</em></h1>
+        <p class="lede">Any set of forces on a rigid body is equivalent to one force and one couple. Change the forces and watch the resultant, the moments and the central axis move.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#lab">Open the lab</a>
+          <a class="button" href="https://github.com/castlelli/physics/tree/main/wrench">Python code</a>
+        </div>
+      </div>
+      <figure class="hero-figure">
+        <canvas id="hero-scene" class="orbit" aria-label="Three forces on a box, with the central axis in green and the resultant R and the minimum moment on it, turning slowly"></canvas>
+        <figcaption>Three forces on the box. In green, the central axis, with R and the minimum moment M_E. Drag to turn it.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="lab">
+      <div class="section-head">
+        <h2>Lab</h2>
+        <p>The forces F_i act at points P_i of a box with one corner at O. Pick an example or type your own data: the poles Q and A, the unit vector u of the axis Au and the box's edges can be edited too.</p>
+      </div>
+
+      <div class="case-bar" data-case-bar role="group" aria-label="Examples"></div>
+
+      <div class="lab-grid">
+        <aside class="panel controls">
+          <fieldset class="control-group">
+            <legend>Forces</legend>
+            <table class="editor">
+              <thead><tr><th></th><th>F = (F<sub>x</sub>, F<sub>y</sub>, F<sub>z</sub>) · P = (x, y, z)</th><th></th></tr></thead>
+              <tbody data-forces></tbody>
+            </table>
+            <button class="button ghost add-row" type="button" data-add-force>+ Add force</button>
+          </fieldset>
+          <fieldset class="control-group">
+            <legend>Poles, axis and box</legend>
+            <div class="vector-row"><span><b>Q</b></span><div data-vec="Q"></div></div>
+            <div class="vector-row"><span><b>A</b></span><div data-vec="A"></div></div>
+            <div class="vector-row"><span><b>u</b> unit</span><div data-vec="u"></div></div>
+            <div class="vector-row"><span>box a, b, c</span><div data-vec="box"></div></div>
+          </fieldset>
+          <div class="transport">
+            <button class="button primary" type="button" data-spin>Spin</button>
+            <button class="button" type="button" data-home>Initial view</button>
+          </div>
+          <p class="status" data-status role="status"></p>
+        </aside>
+
+        <div class="lab-views">
+          <figure class="panel">
+            <figcaption>Figure 1 <span>forces, poles Q and A, axis Au, R, M_Q and M_A; drag to turn</span></figcaption>
+            <canvas id="lab-scene" class="orbit tall" aria-label="Figure 1: the box, the forces, the poles Q and A, the axis Au, the resultant and the moments at Q and at A"></canvas>
+            <ul class="legend">
+              <li><i class="swatch force"></i>F_i, ×<span data-scale-force>1</span></li>
+              <li><i class="swatch resultant"></i>R, same scale</li>
+              <li><i class="swatch moment-q double"></i>M_Q, ×<span data-scale-moment>1</span></li>
+              <li><i class="swatch moment-a double"></i>M_A</li>
+              <li><i class="swatch dash axis-u"></i>axis Au</li>
+            </ul>
+            <p class="figure-note">Forces have one arrowhead, moments two. Forces and moments are drawn at different scales.</p>
+          </figure>
+          <div class="panel table-panel">
+            <table class="results">
+              <tbody data-results></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="eixo">
+      <div class="section-head">
+        <h2>Central axis</h2>
+        <p>On the central axis, the system's moment is parallel to the resultant and as small as it gets. There the whole system becomes R and a couple M_E in the same direction.</p>
+      </div>
+      <figure class="panel">
+        <figcaption>Figure 2 <span>forces, Q and M_Q, central axis with R and M_E</span></figcaption>
+        <canvas id="axis-scene" class="orbit tall" aria-label="Figure 2: the central axis in green, with the resultant and the minimum moment on it"></canvas>
+        <ul class="legend">
+          <li><i class="swatch force"></i>F_i</li>
+          <li><i class="swatch moment-q double"></i>M_Q</li>
+          <li><i class="swatch central"></i>central axis</li>
+          <li><i class="swatch resultant"></i>R</li>
+          <li><i class="swatch central double"></i>M_E</li>
+        </ul>
+        <p class="figure-note" data-axis-note></p>
+      </figure>
+    </section>
+
+    <section class="section" id="minimo">
+      <div class="section-head">
+        <h2>Why this axis</h2>
+        <p>Move the pole P along a line that crosses the central axis at a right angle. The moment grows with the distance d to the axis, and the product R · M(P) does not change: it is the invariant I.</p>
+      </div>
+      <div class="split">
+        <figure class="panel">
+          <figcaption>|M(P)| against the distance to the axis <span>circles: direct sum over the forces</span></figcaption>
+          <canvas id="minimum-plot" class="square" aria-label="Plot of the magnitude of the moment against the distance to the central axis"></canvas>
+        </figure>
+        <div>
+          <div class="slider-block">
+            <label for="minimum-d">Position of the pole P <output data-minimum-d></output></label>
+            <input id="minimum-d" type="range" min="-1" max="1" step="any" value="0">
+          </div>
+          <dl class="readout compact">
+            <div><dt>|M(P)|</dt><dd data-minimum-out="M">–</dd></div>
+            <div><dt>R · M(P)</dt><dd data-minimum-out="RM">–</dd></div>
+            <div><dt>I</dt><dd data-minimum-out="I">–</dd></div>
+            <div><dt>|M_E|</dt><dd data-minimum-out="ME">–</dd></div>
+          </dl>
+          <p class="footnote" data-minimum-note></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="verificacao">
+      <div class="section-head">
+        <h2>The browser checks</h2>
+        <p>Each example was built to fall in one category. The browser redoes the reduction and compares it with that category and with Python's numbers.</p>
+      </div>
+      <div class="check panel table-panel">
+        <table>
+          <thead><tr><th scope="col" data-check-case>Example</th><th scope="col" data-check-expected></th><th scope="col" data-check-browser></th><th scope="col" data-check-diff></th></tr></thead>
+          <tbody data-check-rows></tbody>
+        </table>
+      </div>
+      <div class="toolbar tight">
+        <button class="button primary" type="button" data-check-run>Draw other poles</button>
+        <span class="status" data-check-status role="status"></span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Vinicius Castelli, 2026.</p>
+    <p>
+      <a href="https://github.com/castlelli/physics/tree/main/wrench">Python code</a>
+      <a href="https://github.com/castlelli/physics/tree/main/docs/wrench">Code of this site</a>
+    </p>
+  </footer>
+
+  <script type="module" src="../js/main.js?v=1"></script>
+</body>
+</html>

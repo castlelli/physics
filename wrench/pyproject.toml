@@ -1,0 +1,16 @@
+[project]
+name = "wrench"
+version = "1.0.0"
+description = "Redução de um sistema de forças: resultante, momentos, invariante, classificação e eixo central"
+requires-python = ">=3.10"
+dependencies = ["numpy", "matplotlib"]
+
+[project.optional-dependencies]
+teste = ["pytest"]
+
+[tool.setuptools]
+packages = ["codigo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]

@@ -1,0 +1,11 @@
+grandeza,x,y,z,modulo
+R,1,0,0,1
+M_Q,0,1,1.5,1.80277563773
+M_A,0,0,3,3
+torque_Au,0,0,3,3
+E,0,-1.5,1,1.80277563773
+direcao_eixo,1,0,0,1
+M_E,0,0,0,0
+invariante_I,0,,,
+torque_Au_escalar,3,,,
+categoria,single_force,,,

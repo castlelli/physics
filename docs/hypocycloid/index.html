@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hipocicloide | PME3100</title>
+  <meta name="description" content="Hipocicloide gerada por um disco que rola sem escorregar dentro de um aro. Tarefa 5 de PME3100, Mecânica I, Poli-USP.">
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+  <main>
+    <a class="back" href="../">← Física</a>
+    <p class="eyebrow">PME3100 · Tarefa 5</p>
+    <h1>Hipocicloide</h1>
+    <p>Um disco de raio <i>r</i> rola sem escorregar pela face interna de um aro de raio <i>R</i> &gt; <i>r</i>.
+      Um ponto <i>P</i> da borda do disco traça a hipocicloide:</p>
+    <p class="panel mono">x = (R − r) cos θ + r cos((R − r) θ / r)<br>y = (R − r) sin θ − r sin((R − r) θ / r)</p>
+    <figure>
+      <img src="hipocicloide.gif" alt="Animação: o disco rola dentro do aro e o ponto P desenha a hipocicloide." width="660" height="660" loading="lazy">
+      <figcaption>Geração da curva: o disco rola dentro do aro tracejado e o ponto P deixa o traço.</figcaption>
+    </figure>
+    <h2>O que o programa faz</h2>
+    <ul>
+      <li>Anima a geração da hipocicloide e mostra instantâneos do processo.</li>
+      <li>Traça a curva para quatro razões <i>R</i>/<i>r</i> diferentes.</li>
+      <li>Calcula o raio de curvatura e desenha os versores tangente e normal em vários pontos.</li>
+      <li>Com θ(t) = ωt, ω = π/60 rad/s, dá a velocidade e a aceleração de <i>P</i> em coordenadas cartesianas e intrínsecas.</li>
+      <li>Constrói a curva espacial x = λ, y = λ², z = λ³ e o seu triedro de Frenet.</li>
+    </ul>
+    <div class="actions">
+      <a class="button" href="https://github.com/castlelli/physics/blob/main/hypocycloid/Tarefa5.pdf">Resultados em PDF</a>
+      <a class="button" href="https://github.com/castlelli/physics/tree/main/hypocycloid">Código em Python</a>
+    </div>
+  </main>
+</body>
+</html>

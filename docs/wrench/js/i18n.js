@@ -64,7 +64,7 @@ const STRINGS = {
     },
     axisNote: {
       single_force: (me) => `Uma única força: no eixo central o momento é nulo (|M_E| = ${me}), e R sobre o eixo substitui todo o sistema.`,
-      force_couple: (me) => `Força + binário: no eixo central o momento é paralelo a R e é o menor possível, |M_E| = I/|R| = ${me}.`,
+      force_couple: (me) => `Força + binário: no eixo central o momento é paralelo a R e é o menor possível, |M_E| = |I|/|R| = ${me}.`,
     },
     plotX: "d, distância ao eixo central",
     plotXNoAxis: "d, distância a Q ao longo de x",
@@ -142,7 +142,7 @@ const STRINGS = {
     },
     axisNote: {
       single_force: (me) => `A single force: on the central axis the moment is zero (|M_E| = ${me}), and R on the axis replaces the whole system.`,
-      force_couple: (me) => `Force + couple: on the central axis the moment is parallel to R and as small as it gets, |M_E| = I/|R| = ${me}.`,
+      force_couple: (me) => `Force + couple: on the central axis the moment is parallel to R and as small as it gets, |M_E| = |I|/|R| = ${me}.`,
     },
     plotX: "d, distance to the central axis",
     plotXNoAxis: "d, distance from Q along x",

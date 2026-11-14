@@ -170,17 +170,26 @@ def figure_2(system: System, reduction: Reduction, scale: DrawScale, view: tuple
     _forces(canvas, system, scale)
     diagonal = float(np.linalg.norm([system.box.a, system.box.b, system.box.c]))
     E, d = reduction.axis_point, reduction.axis_direction
-    canvas.line(E - 0.8 * diagonal * d, E + 0.8 * diagonal * d, estilo.CENTRAL, lw=1.3)
+    # R and M_E go on the axis at the point nearest the box's centre, so they sit on the body when the axis crosses it
+    anchor = axis_anchor(system, reduction)
+    canvas.line(anchor - 0.8 * diagonal * d, anchor + 0.8 * diagonal * d, estilo.CENTRAL, lw=1.3)
     canvas.point(E, "$E$", color=estilo.CENTRAL, offset=(0.08, -0.12, 0.0))
     canvas.point(system.pole_q, "$Q$", color=estilo.MOMENT_Q)
     canvas.arrow(system.pole_q, scale.moment * reduction.moment_q, estilo.MOMENT_Q, lw=1.6, double=True, label="$M_Q$")
-    canvas.arrow(E, scale.force * reduction.resultant, estilo.RESULTANT, lw=2.0, label="$R$")
-    canvas.arrow(E, scale.moment * reduction.minimum_moment, estilo.CENTRAL, lw=1.6, double=True, label="$M_E$")
+    canvas.arrow(anchor, scale.force * reduction.resultant, estilo.RESULTANT, lw=2.0, label="$R$")
+    canvas.arrow(anchor, scale.moment * reduction.minimum_moment, estilo.CENTRAL, lw=1.6, double=True, label="$M_E$")
     canvas.finish(view)
     keys = ("F", "R", "MQ", "E", "ME") if np.linalg.norm(reduction.minimum_moment) > 0 else ("F", "R", "MQ", "E")
     fig.legend(handles=_legend(scale, keys), loc="lower center", ncol=3, fontsize=7.5)
     fig.subplots_adjust(left=0, right=1, top=0.95, bottom=0.12)
     return _save(fig, path)
+
+
+def axis_anchor(system: System, reduction: Reduction) -> np.ndarray:
+    """Point of the central axis nearest the centre of the box."""
+    centre = 0.5 * np.array([system.box.a, system.box.b, system.box.c])
+    E, d = reduction.axis_point, reduction.axis_direction
+    return E + ((centre - E) @ d) * d
 
 
 def _legend(scale: DrawScale, keys) -> list[Line2D]:

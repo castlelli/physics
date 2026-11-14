@@ -1,7 +1,7 @@
 // Scene content for figures 1 and 2 of the statement. Forces have one arrowhead, moments two.
 // Colours: forces in ink, R orange, M_Q blue, M_A violet, axis Au grey, central axis and M_E green.
 
-import { add, norm, scale, sub } from "./model.js";
+import { add, dot, norm, scale, sub } from "./model.js";
 
 // Largest drawn force and largest drawn moment both at 40 % of the box diagonal (as figuras.auto_scale).
 export function drawScales(system, r) {
@@ -87,6 +87,13 @@ export function figureOne(system, r, colors, scales) {
   return { items, bounds, pickables: [] };
 }
 
+// Point of the central axis nearest the centre of the box: R and M_E are drawn there, so they sit on
+// the body whenever the axis crosses it (same as figuras.axis_anchor).
+export function axisAnchor(system, r) {
+  const centre = scale(system.box, 0.5);
+  return add(r.axisPoint, scale(r.axisDirection, dot(sub(centre, r.axisPoint), r.axisDirection)));
+}
+
 // Item i: Oxyz, F_i at P_i, Q and M_Q, the central axis with R and M_E on it.
 export function figureTwo(system, r, colors, scales) {
   const items = [];
@@ -98,11 +105,12 @@ export function figureTwo(system, r, colors, scales) {
   vectorItem(items, bounds, system.Q, scale(r.MQ, scales.moment), colors.momentQ, "M_Q", { double: true });
   if (r.axisPoint) {
     const diagonal = norm(system.box);
+    const anchor = axisAnchor(system, r);
     const reach = scale(r.axisDirection, 0.8 * diagonal);
-    items.push({ kind: "segment", a: sub(r.axisPoint, reach), b: add(r.axisPoint, reach), color: colors.central, width: 2, split: 16 });
+    items.push({ kind: "segment", a: sub(anchor, reach), b: add(anchor, reach), color: colors.central, width: 2, split: 16 });
     pointItem(items, bounds, r.axisPoint, "E", colors.central);
-    vectorItem(items, bounds, r.axisPoint, scale(r.R, scales.force), colors.resultant, "R", { width: 3 });
-    vectorItem(items, bounds, r.axisPoint, scale(r.ME, scales.moment), colors.central, "M_E", { double: true });
+    vectorItem(items, bounds, anchor, scale(r.R, scales.force), colors.resultant, "R", { width: 3 });
+    vectorItem(items, bounds, anchor, scale(r.ME, scales.moment), colors.central, "M_E", { double: true });
   }
   return { items, bounds, pickables: [] };
 }

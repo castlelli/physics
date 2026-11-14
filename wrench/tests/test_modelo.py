@@ -73,6 +73,28 @@ def test_every_case_has_its_category_and_shape(key):
     assert all(case.system().box.contains(p) for p in case.system().points)
 
 
+def crosses_box(point, direction, size, tol=1e-9) -> bool:
+    """Whether the line point + t·direction meets the box [0, size] (slab test)."""
+    lo, hi = -np.inf, np.inf
+    for i in range(3):
+        if abs(direction[i]) < 1e-12:
+            if not -tol <= point[i] <= size[i] + tol:
+                return False
+        else:
+            t1, t2 = (-tol - point[i]) / direction[i], (size[i] + tol - point[i]) / direction[i]
+            lo, hi = max(lo, min(t1, t2)), min(hi, max(t1, t2))
+    return lo <= hi
+
+
+@pytest.mark.parametrize("key", sorted(CASES))
+def test_the_central_axis_of_every_example_crosses_the_box(key):
+    system = CASES[key].system()
+    r = reduce(system)
+    if r.has_central_axis:
+        size = np.array([system.box.a, system.box.b, system.box.c])
+        assert crosses_box(r.axis_point, r.axis_direction, size)
+
+
 def test_the_cases_cover_the_four_categories_and_the_three_shapes():
     categories = {c.expected for c in CASES.values()}
     assert categories == {NULL, COUPLE, SINGLE_FORCE, FORCE_COUPLE}

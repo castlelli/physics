@@ -1,5 +1,7 @@
 """Ready-made systems on a 2 × 1,5 × 1 box: every category of the statement, and for 'single force'
-the general, concurrent, coplanar and parallel kinds, plus n = 1."""
+the general, concurrent, coplanar and parallel kinds, plus n = 1. Where there is a central axis, the
+data were chosen so that it crosses the box (tests/test_modelo.py checks it); the physics alone
+does not require that."""
 
 from __future__ import annotations
 
@@ -87,7 +89,7 @@ CASES: dict[str, Case] = {
     "forca_coplanares": Case(
         title="Uma força: forças coplanares na face superior",
         forces=((2.0, 0.0, 0.0), (0.0, 1.0, 0.0), (-1.0, -1.0, 0.0)),
-        points=((0.0, 0.0, 1.0), (2.0, 0.0, 1.0), (2.0, 1.5, 1.0)),
+        points=((0.0, 0.25, 1.0), (0.5, 0.0, 1.0), (2.0, 1.5, 1.0)),
         pole_q=ORIGIN, pole_a=(0.0, 1.5, 1.0), u=(0.0, 0.0, 1.0),
         expected=SINGLE_FORCE, expected_shape=(COPLANAR,),
         view=(38.0, -64.0),
@@ -101,15 +103,15 @@ CASES: dict[str, Case] = {
     ),
     "uma_forca": Case(
         title="Uma força: n = 1",
-        forces=((1.0, -2.0, 2.0),),
-        points=((2.0, 1.5, 0.0),),
+        forces=((1.0, -0.5, -2.0),),
+        points=((1.0, 0.75, 1.0),),
         pole_q=ORIGIN, pole_a=(0.0, 1.5, 1.0), u=(1.0, 0.0, 0.0),
         expected=SINGLE_FORCE,
     ),
     "forca_binario": Case(
         title="Força e binário: três forças quaisquer",
         forces=((0.0, 2.0, 0.0), (0.0, 0.0, 3.0), (1.0, 0.0, -1.0)),
-        points=((2.0, 0.0, 1.0), (0.0, 0.0, 0.0), (0.0, 1.5, 1.0)),
+        points=((0.0, 0.0, 1.0), (2.0, 0.75, 0.0), (2.0, 0.75, 0.5)),
         pole_q=ORIGIN, pole_a=FAR_CORNER, u=(1.0, 1.0, 1.0),
         expected=FORCE_COUPLE,
     ),

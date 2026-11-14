@@ -3,14 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Campo de momentos de uma força | PME3100</title>
+  <title>Campo de momentos de uma força</title>
   <meta name="description" content="O campo de momentos de uma força em 3D, ao vivo: mude a força e o ponto de aplicação e veja a axissimetria em torno da linha de ação, com os cortes que a provam.">
   <meta name="color-scheme" content="light dark">
   <meta property="og:title" content="Campo de momentos de uma força">
-  <meta property="og:description" content="M(O) = (P − O) ∧ F em 3D, com os cortes que provam a axissimetria. PME3100, Poli-USP.">
+  <meta property="og:description" content="M(O) = (P − O) ∧ F em 3D, com os cortes que provam a axissimetria.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2313161b'/%3E%3Cpath d='M16 4v24' stroke='%23e5484d' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M22 16l4 6M10 16l-4-6M16 22l-6 3M16 10l6-3' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="alternate" hreflang="pt-BR" href="https://castlelli.github.io/physics/momentfield/">
+  <link rel="alternate" hreflang="en" href="https://castlelli.github.io/physics/momentfield/en/">
   <link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="stylesheet" href="style.css?v=2">
   <script>
     // Applies a saved theme before first paint.
     try { const saved = localStorage.getItem("theme"); if (saved) document.documentElement.dataset.theme = saved; } catch (error) {}
@@ -21,7 +23,7 @@
 
   <header class="nav">
     <a class="back" href="../" aria-label="Voltar aos projetos de física"><span aria-hidden="true">←</span><span class="back-label">Física</span></a>
-    <a class="brand" href="#topo">Campo de momentos <span>PME3100</span></a>
+    <a class="brand" href="#topo">Campo de momentos</a>
     <nav aria-label="Seções">
       <a href="#lab">Laboratório</a>
       <a href="#corte-normal">Corte normal</a>
@@ -29,7 +31,8 @@
       <a href="#verificacao">Verificação</a>
     </nav>
     <div class="nav-actions">
-      <a class="button ghost" href="https://github.com/castlelli/physics/blob/main/momentfield/resultado/relatorio_momentos.pdf">Relatório em PDF</a>
+      <a class="button ghost" data-pdf href="https://github.com/castlelli/physics/blob/main/momentfield/resultado/relatorio_momentos.pdf">Relatório em PDF</a>
+      <a class="button ghost" href="en/" hreflang="en" lang="en" aria-label="English">EN</a>
       <button class="button ghost" type="button" data-theme-toggle aria-label="Alternar entre tema claro e escuro">Tema</button>
     </div>
   </header>
@@ -37,7 +40,7 @@
   <main>
     <section class="hero" id="topo">
       <div class="hero-text">
-        <p class="eyebrow">PME3100 Mecânica I, Optativa 1</p>
+        <p class="eyebrow">Física, estática</p>
         <h1>O campo de momentos de uma força, <em>em 3D</em></h1>
         <p class="lede">M(O) = (P − O) ∧ F gira em torno da linha de ação da força. Mude a força, arraste a figura e veja a simetria se manter.</p>
         <div class="hero-actions">
@@ -47,7 +50,7 @@
       </div>
       <figure class="hero-figure">
         <canvas id="hero-scene" class="orbit" aria-label="Campo de momentos da força F = (1, 2, 3) aplicada na origem, girando devagar"></canvas>
-        <figcaption>O exemplo do professor: F = (1, 2, 3) aplicada na origem. Arraste para girar.</figcaption>
+        <figcaption>F = (1, 2, 3) aplicada na origem. Arraste para girar.</figcaption>
       </figure>
     </section>
 
@@ -173,7 +176,7 @@
   </main>
 
   <footer class="footer">
-    <p>Vinicius Castelli, NUSP 17864509. PME3100 Mecânica I, Escola Politécnica da USP, 2026.</p>
+    <p>Vinicius Castelli, 2026.</p>
     <p>
       <a href="https://github.com/castlelli/physics/blob/main/momentfield/resultado/relatorio_momentos.pdf">Relatório em PDF</a>
       <a href="https://github.com/castlelli/physics/tree/main/momentfield">Código em Python</a>
@@ -181,6 +184,6 @@
     </p>
   </footer>
 
-  <script type="module" src="js/main.js?v=1"></script>
+  <script type="module" src="js/main.js?v=2"></script>
 </body>
 </html>

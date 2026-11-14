@@ -2,12 +2,13 @@
 
 import { runProofs } from "./model.js";
 import { fmtSci } from "./ui.js";
+import { T } from "./i18n.js";
 
 const ROWS = [
-  ["axial_component", "M normal ao eixo", "máx |M · u|"],
-  ["magnitude", "Módulo linear na distância", "máx ||M| − |F| |d||"],
-  ["translation", "Translação ao longo do eixo", "máx |M(O + t u) − M(O)|"],
-  ["rotation", "Rotação em torno do eixo", "máx |M(R O) − R M(O)|"],
+  ["axial_component", "|M · u|"],
+  ["magnitude", "||M| − |F| |d||"],
+  ["translation", "|M(O + t u) − M(O)|"],
+  ["rotation", "|M(R O) − R M(O)|"],
 ];
 
 export function createProof(report, lab) {
@@ -15,8 +16,8 @@ export function createProof(report, lab) {
   const body = root.querySelector("[data-check-rows]");
   const status = root.querySelector("[data-check-status]");
   const reference = report.cases.relatorio;
-  root.querySelector("[data-check-python]").textContent = "Python, exemplo do relatório";
-  root.querySelector("[data-check-browser]").textContent = "Navegador, mesmos dados";
+  root.querySelector("[data-check-python]").textContent = T.proofPython;
+  root.querySelector("[data-check-browser]").textContent = T.proofBrowser;
   let seed = 1;
 
   function run() {
@@ -24,13 +25,13 @@ export function createProof(report, lab) {
     const field = lab.field();
     const live = field ? runProofs(field.forcePoint, field.force, 500, seed) : null;
     body.innerHTML = "";
-    for (const [key, name, formula] of ROWS) {
+    for (const [key, formula] of ROWS) {
       const row = document.createElement("tr");
-      row.innerHTML = `<td>${name}<span class="formula">${formula}</span></td><td>${fmtSci(reference.proof.relative[key], 1)}</td><td>${fmtSci(browser.relative[key], 1)}</td><td>${live ? fmtSci(live.relative[key], 1) : "–"}</td>`;
+      row.innerHTML = `<td>${T.proofRows[key]}<span class="formula">${T.proofMax} ${formula}</span></td><td>${fmtSci(reference.proof.relative[key], 1)}</td><td>${fmtSci(browser.relative[key], 1)}</td><td>${live ? fmtSci(live.relative[key], 1) : "–"}</td>`;
       body.appendChild(row);
     }
     const worst = Math.max(...Object.values(browser.relative), ...(live ? Object.values(live.relative) : []));
-    status.textContent = `Erros relativos ao maior |M| sorteado. Pior valor no navegador: ${fmtSci(worst, 1)}, da ordem do épsilon da precisão dupla (2,2×10⁻¹⁶).`;
+    status.textContent = T.proofStatus(fmtSci(worst, 1), fmtSci(2.220446049250313e-16, 1));
   }
 
   root.querySelector("[data-check-run]").addEventListener("click", () => {

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moment field of a force</title>
+  <meta name="description" content="The moment field of a force in 3D, live: change the force and its point of application and watch the axisymmetry about the line of action, with the sections that prove it.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="Moment field of a force">
+  <meta property="og:description" content="M(O) = (P − O) ∧ F in 3D, with the sections that prove the axisymmetry.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2313161b'/%3E%3Cpath d='M16 4v24' stroke='%23e5484d' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M22 16l4 6M10 16l-4-6M16 22l-6 3M16 10l6-3' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="alternate" hreflang="pt-BR" href="https://castlelli.github.io/physics/momentfield/">
+  <link rel="alternate" hreflang="en" href="https://castlelli.github.io/physics/momentfield/en/">
+  <link rel="preload" href="../fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../style.css?v=2">
+  <script>
+    // Applies a saved theme before first paint.
+    try { const saved = localStorage.getItem("theme"); if (saved) document.documentElement.dataset.theme = saved; } catch (error) {}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#lab">Skip to the lab</a>
+
+  <header class="nav">
+    <a class="back" href="../../" aria-label="Back to the physics projects"><span aria-hidden="true">←</span><span class="back-label">Physics</span></a>
+    <a class="brand" href="#topo">Moment field</a>
+    <nav aria-label="Sections">
+      <a href="#lab">Lab</a>
+      <a href="#corte-normal">Normal section</a>
+      <a href="#corte-axial">Axial section</a>
+      <a href="#verificacao">Verification</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="button ghost" data-pdf href="https://github.com/castlelli/physics/blob/main/momentfield/resultado/relatorio_momentos.pdf" hreflang="pt-BR">PDF report (pt)</a>
+      <a class="button ghost" href="../" hreflang="pt-BR" lang="pt-BR" aria-label="Português">PT</a>
+      <button class="button ghost" type="button" data-theme-toggle aria-label="Switch between light and dark theme">Theme</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="topo">
+      <div class="hero-text">
+        <p class="eyebrow">Physics, statics</p>
+        <h1>The moment field of a force, <em>in 3D</em></h1>
+        <p class="lede">M(O) = (P − O) ∧ F turns around the force's line of action. Change the force, drag the figure and watch the symmetry hold.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#lab">Open the lab</a>
+          <a class="button" href="https://github.com/castlelli/physics/blob/main/momentfield/resultado/relatorio_momentos.pdf" hreflang="pt-BR">PDF report (Portuguese)</a>
+        </div>
+      </div>
+      <figure class="hero-figure">
+        <canvas id="hero-scene" class="orbit" aria-label="Moment field of the force F = (1, 2, 3) applied at the origin, turning slowly"></canvas>
+        <figcaption>F = (1, 2, 3) applied at the origin. Drag to turn it.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="lab">
+      <div class="section-head">
+        <h2>Lab</h2>
+        <p>The poles sit on planes normal to the line of action, with rays 60° apart. Each black arrow is the moment of the force about one pole. Click a pole to see its triangle: O, the foot Q of the perpendicular, and the tip of M.</p>
+      </div>
+
+      <div class="case-bar" data-case-bar role="group" aria-label="Data sets"></div>
+
+      <div class="lab-grid">
+        <aside class="panel controls">
+          <div data-controls></div>
+          <fieldset class="control-group">
+            <legend>Angle step</legend>
+            <div class="segmented compact" data-step role="group" aria-label="Angle between rays"></div>
+          </fieldset>
+          <fieldset class="control-group">
+            <legend>Drawing</legend>
+            <div class="toggles">
+              <label class="toggle"><input type="checkbox" data-show="poleFoot" checked><i class="swatch dash pole-foot"></i>O → Q</label>
+              <label class="toggle"><input type="checkbox" data-show="tipFoot" checked><i class="swatch dash tip-foot"></i>tip of M → Q</label>
+            </div>
+          </fieldset>
+          <div class="transport">
+            <button class="button primary" type="button" data-spin>Spin</button>
+            <button class="button" type="button" data-home>Initial view</button>
+          </div>
+          <p class="status" data-status role="status"></p>
+        </aside>
+
+        <div class="lab-views">
+          <figure class="panel">
+            <figcaption>Moment field <span>drag to turn, click a pole, Ctrl + wheel to zoom</span></figcaption>
+            <canvas id="lab-scene" class="orbit tall" aria-label="Moment field in 3D: line of action in red, moments in black, green and blue dashed lines to the foot of the perpendicular"></canvas>
+            <ul class="legend">
+              <li><i class="swatch force"></i>F and its line of action</li>
+              <li><i class="swatch moment"></i>M(O), drawn ×<span data-scale-label>1</span></li>
+              <li><i class="swatch dash pole-foot"></i>O → Q</li>
+              <li><i class="swatch dash tip-foot"></i>tip of M → Q</li>
+            </ul>
+            <p class="figure-note">The moments are drawn to scale. The blue lines run to the drawn tip: the right angle at O is true, and the arrow's length is the moment times the scale.</p>
+          </figure>
+          <dl class="readout" data-pole>
+            <div><dt>pole O</dt><dd data-pole-out="O">click a pole</dd></div>
+            <div><dt>foot Q</dt><dd data-pole-out="Q">–</dd></div>
+            <div><dt>|d| = |O − Q|</dt><dd data-pole-out="d">–</dd></div>
+            <div><dt>|M|</dt><dd data-pole-out="M">–</dd></div>
+            <div><dt>|F|·|d|</dt><dd data-pole-out="Fd">–</dd></div>
+            <div><dt>M·u</dt><dd data-pole-out="Mu">–</dd></div>
+            <div><dt>angle at O</dt><dd data-pole-out="angle">–</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="corte-normal">
+      <div class="section-head">
+        <h2>Section normal to the axis</h2>
+        <p>Only the poles of one plane normal to the line of action, seen along it: the force points at you. The moments turn around the axis like a pinwheel. Move the plane along the axis: the drawing does not change.</p>
+      </div>
+      <div class="pair">
+        <figure class="panel">
+          <figcaption>The chosen plane <span>seen along F</span></figcaption>
+          <canvas id="normal-scene" class="square" aria-label="Section normal to the axis: the moments of one plane form a pinwheel around the force"></canvas>
+        </figure>
+        <figure class="panel">
+          <figcaption>Where the plane is <span>seen from the side</span></figcaption>
+          <canvas id="normal-side" class="square" aria-label="Side view of the field with the chosen plane highlighted"></canvas>
+        </figure>
+      </div>
+      <div class="toolbar tight">
+        <div class="slider-block grow">
+          <label for="normal-s">Position of the plane along the axis <output data-normal-s></output></label>
+          <input id="normal-s" type="range" min="-1" max="1" step="0.001" value="0">
+        </div>
+        <button class="button primary" type="button" data-normal-turn>Turn 60° about F</button>
+      </div>
+      <p class="footnote" data-normal-note></p>
+    </section>
+
+    <section class="section" id="corte-axial">
+      <div class="section-head">
+        <h2>Section containing the axis</h2>
+        <p>Now only the poles of the plane that contains the line of action. The moments are normal to that plane: they go in on one side of the axis and come out on the other, larger the farther away.</p>
+      </div>
+      <div class="split">
+        <figure class="panel">
+          <figcaption>The plane of the axis <span data-axial-caption>face on: ⊙ comes out of the screen, ⊗ goes in</span></figcaption>
+          <canvas id="axial-scene" class="square" aria-label="Section containing the axis: moments normal to the screen, drawn as circles with a dot or a cross"></canvas>
+          <div class="toolbar tight">
+            <div class="segmented" data-axial-view role="group" aria-label="View of the section">
+              <button type="button" data-view="front" aria-pressed="true">Face on</button>
+              <button type="button" data-view="tilted" aria-pressed="false">Tilted 20°</button>
+            </div>
+          </div>
+        </figure>
+        <figure class="panel">
+          <figcaption>Component of M normal to the plane <span>against the signed distance to the axis</span></figcaption>
+          <canvas id="axial-plot" class="square" aria-label="Plot: the normal component of the moment falls on a line through the origin"></canvas>
+          <p class="figure-note" data-axial-note></p>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="verificacao">
+      <div class="section-head">
+        <h2>The browser checks the symmetry</h2>
+        <p>Five hundred random poles around P. For each, the four properties that make the field axisymmetric, measured here and in the report's Python. The errors are the size of machine rounding.</p>
+      </div>
+      <div class="check panel table-panel">
+        <table>
+          <thead><tr><th scope="col">Property</th><th scope="col" data-check-python>Python</th><th scope="col" data-check-browser>Browser</th><th scope="col">Lab data</th></tr></thead>
+          <tbody data-check-rows></tbody>
+        </table>
+      </div>
+      <div class="toolbar tight">
+        <button class="button primary" type="button" data-check-run>Draw other poles</button>
+        <span class="status" data-check-status role="status"></span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Vinicius Castelli, 2026.</p>
+    <p>
+      <a href="https://github.com/castlelli/physics/blob/main/momentfield/resultado/relatorio_momentos.pdf" hreflang="pt-BR">PDF report (Portuguese)</a>
+      <a href="https://github.com/castlelli/physics/tree/main/momentfield">Python code</a>
+      <a href="https://github.com/castlelli/physics/tree/main/docs/momentfield">Code of this site</a>
+    </p>
+  </footer>
+
+  <script type="module" src="../js/main.js?v=2"></script>
+</body>
+</html>

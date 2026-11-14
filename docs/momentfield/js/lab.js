@@ -5,19 +5,21 @@ import { InputError, autoScale, dot, norm, sampleField } from "./model.js";
 import { angleAtPole, fieldContent } from "./field.js";
 import { createScene, frameForAxis } from "./scene.js";
 import { fmt, fmtSci, theme, trimmed, watchVisibility } from "./ui.js";
+import { T } from "./i18n.js";
 
+const C = T.controls;
 const CONTROLS = [
-  { group: "Força", key: "Fx", symbol: "F<sub>x</sub>", name: "componente x", min: -5, max: 5, step: 0.1 },
-  { group: "Força", key: "Fy", symbol: "F<sub>y</sub>", name: "componente y", min: -5, max: 5, step: 0.1 },
-  { group: "Força", key: "Fz", symbol: "F<sub>z</sub>", name: "componente z", min: -5, max: 5, step: 0.1 },
-  { group: "Ponto de aplicação", key: "Px", symbol: "P<sub>x</sub>", name: "coordenada x", min: -5, max: 5, step: 0.1 },
-  { group: "Ponto de aplicação", key: "Py", symbol: "P<sub>y</sub>", name: "coordenada y", min: -5, max: 5, step: 0.1 },
-  { group: "Ponto de aplicação", key: "Pz", symbol: "P<sub>z</sub>", name: "coordenada z", min: -5, max: 5, step: 0.1 },
-  { group: "Polos", key: "nPlanes", symbol: "planos", name: "normais ao eixo", min: 1, max: 7, step: 1 },
-  { group: "Polos", key: "planeSpacing", symbol: "Δs", name: "entre planos", min: 0.25, max: 3, step: 0.05 },
-  { group: "Polos", key: "nRadii", symbol: "polos", name: "por raio", min: 1, max: 4, step: 1 },
-  { group: "Polos", key: "radiusStep", symbol: "Δr", name: "entre polos do raio", min: 0.25, max: 2, step: 0.05 },
-  { group: "Desenho", key: "momentFactor", symbol: "escala", name: "das setas de M", min: 0.25, max: 4, step: 0.01, log: true, unit: "× auto" },
+  { group: T.groups.force, key: "Fx", symbol: "F<sub>x</sub>", name: C.Fx, min: -5, max: 5, step: 0.1 },
+  { group: T.groups.force, key: "Fy", symbol: "F<sub>y</sub>", name: C.Fy, min: -5, max: 5, step: 0.1 },
+  { group: T.groups.force, key: "Fz", symbol: "F<sub>z</sub>", name: C.Fz, min: -5, max: 5, step: 0.1 },
+  { group: T.groups.point, key: "Px", symbol: "P<sub>x</sub>", name: C.Px, min: -5, max: 5, step: 0.1 },
+  { group: T.groups.point, key: "Py", symbol: "P<sub>y</sub>", name: C.Py, min: -5, max: 5, step: 0.1 },
+  { group: T.groups.point, key: "Pz", symbol: "P<sub>z</sub>", name: C.Pz, min: -5, max: 5, step: 0.1 },
+  { group: T.groups.poles, key: "nPlanes", symbol: C.nPlanes[0], name: C.nPlanes[1], min: 1, max: 7, step: 1 },
+  { group: T.groups.poles, key: "planeSpacing", symbol: C.planeSpacing[0], name: C.planeSpacing[1], min: 0.25, max: 3, step: 0.05 },
+  { group: T.groups.poles, key: "nRadii", symbol: C.nRadii[0], name: C.nRadii[1], min: 1, max: 4, step: 1 },
+  { group: T.groups.poles, key: "radiusStep", symbol: C.radiusStep[0], name: C.radiusStep[1], min: 0.25, max: 2, step: 0.05 },
+  { group: T.groups.drawing, key: "momentFactor", symbol: C.momentFactor[0], name: C.momentFactor[1], min: 0.25, max: 4, step: 0.01, log: true, unit: "× auto" },
 ];
 const STEPS = [30, 45, 60, 90, 120];
 
@@ -64,10 +66,11 @@ export function createLab(report) {
       if (!(error instanceof InputError)) throw error;
       field = null;
       prevV1 = null;
-      nodes.status.textContent = error.message;
-      scene.setMessage(error.message);
+      const message = T.errors[error.message] ?? error.message;
+      nodes.status.textContent = message;
+      scene.setMessage(message);
       showPole();
-      listeners.forEach((listener) => listener(null, error.message));
+      listeners.forEach((listener) => listener(null, message));
       return;
     }
     const auto = autoScale(field);
@@ -78,8 +81,7 @@ export function createLab(report) {
     scene.setContent((colors) => fieldContent(field, colors, drawOptions()));
     previousCounts = counts;
     nodes.scaleLabel.textContent = trimmed(scales.moment, 3);
-    const extra = state.angleStepDeg === 60 ? "" : " O enunciado pede 60°.";
-    nodes.status.textContent = `${field.samples.length} polos: ${config.nPlanes} ${config.nPlanes === 1 ? "plano" : "planos"} × ${field.config.nRays} raios × ${config.nRadii} ${config.nRadii === 1 ? "polo" : "polos"} por raio.${extra}`;
+    nodes.status.textContent = T.status(field.samples.length, config.nPlanes, field.config.nRays, config.nRadii);
     showPole();
     listeners.forEach((listener) => listener(field, null));
   }
@@ -98,11 +100,11 @@ export function createLab(report) {
     const s = field && state.selected !== null ? field.samples[state.selected] : null;
     const out = nodes.pole;
     if (!s) {
-      out.O.textContent = field ? "clique num polo" : "–";
+      out.O.textContent = field ? T.pickPole : "–";
       for (const key of ["Q", "d", "M", "Fd", "Mu", "angle"]) out[key].textContent = "–";
       return;
     }
-    const vec = (v) => `(${v.map((c) => fmt(c, 2)).join("; ")})`;
+    const vec = (v) => `(${v.map((c) => fmt(c, 2)).join(T.vectorSeparator)})`;
     const m = norm(s.moment);
     out.O.textContent = vec(s.pole);
     out.Q.textContent = vec(s.foot);
@@ -215,13 +217,13 @@ export function createLab(report) {
   }
 
   function buildCases() {
-    const marks = { relatorio: "R", campo1: "C1" };
-    for (const [key, item] of Object.entries(report.cases)) {
+    const marks = { relatorio: "1", campo1: "2" };
+    for (const key of Object.keys(report.cases)) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "case-chip";
       button.dataset.case = key;
-      button.innerHTML = `<span class="case-letter">${marks[key] ?? "•"}</span><span class="case-title">${item.title}</span>`;
+      button.innerHTML = `<span class="case-letter">${marks[key] ?? "•"}</span><span class="case-title">${T.cases[key] ?? key}</span>`;
       button.addEventListener("click", () => load(key));
       nodes.cases.appendChild(button);
     }
@@ -229,7 +231,7 @@ export function createLab(report) {
     free.type = "button";
     free.className = "case-chip";
     free.dataset.case = "";
-    free.innerHTML = `<span class="case-letter">∗</span><span class="case-title">Dados livres: mude qualquer controle</span>`;
+    free.innerHTML = `<span class="case-letter">∗</span><span class="case-title">${T.cases.free}</span>`;
     free.addEventListener("click", () => {
       state.caseKey = null;
       syncInputs();
@@ -261,7 +263,7 @@ export function createLab(report) {
   function setSpin(on) {
     spin.on = on;
     spin.last = 0;
-    nodes.spin.textContent = on ? "Parar" : "Girar";
+    nodes.spin.textContent = on ? T.stop : T.spin;
     if (on) requestAnimationFrame(frame);
   }
   scene.setSpin({ pause: () => setSpin(false) });

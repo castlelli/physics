@@ -5,10 +5,11 @@ import { createScene, frameForAxis } from "./scene.js";
 import { autoScale, sampleField } from "./model.js";
 import { fieldContent } from "./field.js";
 import { invalidateTheme, reducedMotion, theme, watchVisibility } from "./ui.js";
+import { T } from "./i18n.js";
 
 function setupTheme() {
   const toggle = document.querySelector("[data-theme-toggle]");
-  const label = () => (toggle.textContent = theme().dark ? "Tema claro" : "Tema escuro");
+  const label = () => (toggle.textContent = theme().dark ? T.themeLight : T.themeDark);
   toggle.addEventListener("click", () => {
     const next = theme().dark ? "light" : "dark";
     document.documentElement.dataset.theme = next;
@@ -27,7 +28,7 @@ function setupTheme() {
   label();
 }
 
-// The professor's example, turning slowly until the reader grabs it.
+// The F = (1, 2, 3) example, turning slowly until the reader grabs it.
 function setupHero(report) {
   const item = report.cases.campo1;
   const c = item.config;
@@ -59,7 +60,8 @@ function setupHero(report) {
 
 async function main() {
   setupTheme();
-  const report = await fetch("data/report.json").then((response) => response.json());
+  // resolved from this module, so the English page in en/ reads the same file
+  const report = await fetch(new URL("../data/report.json", import.meta.url)).then((response) => response.json());
   setupHero(report);
   const lab = createLab(report);
   createNormalSection(lab);

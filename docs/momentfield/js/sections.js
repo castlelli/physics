@@ -5,6 +5,7 @@ import { add, axialSection, cross, dot, moment, norm, rotate, scale, sub } from 
 import { fieldContent } from "./field.js";
 import { createScene } from "./scene.js";
 import { Plot, fmt, fmtSci, onResize, onThemeChange, reducedMotion, theme, trimmed } from "./ui.js";
+import { T } from "./i18n.js";
 
 // ---------------------------------------------------------------- normal section
 
@@ -138,11 +139,11 @@ export function createNormalSection(lab) {
       return;
     }
     turnButton.disabled = false;
-    turnButton.textContent = `Girar ${trimmed(field.config.angleStepDeg, 0)}° em torno de F`;
+    turnButton.textContent = T.turnButton(trimmed(field.config.angleStepDeg, 0));
     const { u, v1, v2 } = field.basis;
     main.setFrame({ right: v1, up: v2 }); // back = v1 ∧ v2 = u: F points at the reader
     side.setFrame({ right: u, up: v1 }); // back = u ∧ v1 = v2: the plane is seen edge-on
-    if (!animating) note.textContent = `A força aponta para você (⊙). Cada momento é tangente à circunferência do seu raio, e o desenho é igual em todo plano: s não aparece em M(O) = F ∧ d.`;
+    if (!animating) note.textContent = T.normalNote;
     render();
   }
 
@@ -174,7 +175,7 @@ export function createNormalSection(lab) {
     const duration = reducedMotion() ? 0 : 1100;
     const start = performance.now();
     animating = true;
-    note.textContent = "Girando o desenho; a cópia apagada é o desenho original.";
+    note.textContent = T.turning;
     const tick = (time) => {
       const f = duration ? Math.min(1, (time - start) / duration) : 1;
       turn = step * (f < 0.5 ? 4 * f * f * f : 1 - (-2 * f + 2) ** 3 / 2);
@@ -183,7 +184,7 @@ export function createNormalSection(lab) {
       animating = false;
       turn = 0;
       main.setContent(content, { keepFit: true });
-      note.textContent = `Depois de ${trimmed(field.config.angleStepDeg, 0)}°, cada polo cai sobre o polo do raio seguinte e cada seta sobre a seta dele. Maior desvio: ${fmtSci(deviation(), 1)} do maior momento, o arredondamento da máquina.`;
+      note.textContent = T.turned(trimmed(field.config.angleStepDeg, 0), fmtSci(deviation(), 1));
     };
     requestAnimationFrame(tick);
   });
@@ -205,7 +206,7 @@ export function createAxialSection(lab) {
   const note = root.querySelector("[data-axial-note]");
   const viewButtons = [...root.querySelectorAll("[data-axial-view] button")];
   const plotCanvas = document.getElementById("axial-plot");
-  const plot = new Plot(plotCanvas, { xLabel: "d, distância ao eixo com sinal", yLabel: "M · n", margin: { left: 52, right: 14, top: 12, bottom: 34 } });
+  const plot = new Plot(plotCanvas, { xLabel: T.plotX, yLabel: "M · n", margin: { left: 52, right: 14, top: 12, bottom: 34 } });
   let field = null;
   let view = "front";
 
@@ -282,7 +283,7 @@ export function createAxialSection(lab) {
     ctx.textAlign = "left";
     ctx.textBaseline = "bottom";
     const { left, top, height } = plot.inner;
-    ctx.fillText(`reta: M · n = −|F| d`, left + 8, top + height - 26);
+    ctx.fillText(T.plotLine, left + 8, top + height - 26);
     ctx.fillText(`|F| = ${fmt(normF, 3)}`, left + 8, top + height - 8);
   }
 
@@ -308,12 +309,12 @@ export function createAxialSection(lab) {
     const { u, v1 } = field.basis;
     if (view === "front") {
       scene.setFrame({ right: v1, up: u });
-      caption.textContent = "de frente: ⊙ sai da tela, ⊗ entra";
+      caption.textContent = T.axialFront;
     } else {
       // camera 20° above the normal of the plane: the out-of-page arrows show
       const tilt = (20 * Math.PI) / 180;
       scene.setFrame({ right: v1, up: rotate(u, v1, -tilt) });
-      caption.textContent = "inclinado 20°: as setas saem do plano";
+      caption.textContent = T.axialTilted;
     }
     scene.setContent(content);
   }
@@ -330,8 +331,7 @@ export function createAxialSection(lab) {
     drawPlot();
     const oneSide = field.config.nRays % 2 === 1;
     note.textContent =
-      (oneSide ? `Com ${trimmed(field.config.angleStepDeg, 0)}° não há raio a 180°: só um lado do eixo é amostrado. ` : "") +
-      `Os polos de todos os planos caem na mesma reta. Maior desvio dela, somado à parte de M no plano: ${fmtSci(lineError(), 1)} do maior momento.`;
+      (oneSide ? T.oneSide(trimmed(field.config.angleStepDeg, 0)) : "") + T.axialNote(fmtSci(lineError(), 1));
   }
 
   for (const button of viewButtons) button.addEventListener("click", () => setView(button.dataset.view));

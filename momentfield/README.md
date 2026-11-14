@@ -6,7 +6,7 @@ desenha esse campo sobre polos em planos normais à linha de ação, igualmente 
 três vistas (perspectiva, corte normal ao eixo e corte que contém o eixo) e numericamente.
 
 Versão interativa, com o mesmo cálculo no navegador:
-<https://castlelli.github.io/physics/momentfield/>
+<https://castlelli.github.io/physics/momentfield/> (em inglês: <https://castlelli.github.io/physics/momentfield/en/>)
 
 O relatório é `resultado/relatorio_momentos.pdf`.
 

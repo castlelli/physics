@@ -5,6 +5,7 @@
 export const ZERO_FORCE_TOL = 1e-12;
 const BASIS_CONTINUITY_TOL = 1e-8;
 
+// The message is a code; the page translates it (js/i18n.js, errors).
 export class InputError extends Error {}
 
 // ---------------------------------------------------------------- vectors ([x, y, z] arrays)
@@ -22,7 +23,7 @@ export const norm = (a) => Math.sqrt(dot(a, a));
 // Gram–Schmidt against the previous v1, so the rays do not jump while F is dragged.
 export function lineBasis(force, prevV1 = null) {
   const length = norm(force);
-  if (!(length >= ZERO_FORCE_TOL)) throw new InputError("A força não pode ser nula: sem força não há linha de ação.");
+  if (!(length >= ZERO_FORCE_TOL)) throw new InputError("zeroForce");
   const u = scale(force, 1 / length);
   let v1 = null;
   if (prevV1) {
@@ -65,11 +66,11 @@ export function rotate(v, u, theta) {
 
 export function checkConfig(config) {
   const { nPlanes, planeSpacing, angleStepDeg, nRadii, radiusStep } = config;
-  if (!(Number.isInteger(nPlanes) && nPlanes >= 1)) throw new InputError("É preciso ao menos 1 plano.");
-  if (!(planeSpacing > 0)) throw new InputError("O espaçamento entre planos deve ser positivo.");
-  if (!(Number.isInteger(nRadii) && nRadii >= 1)) throw new InputError("É preciso ao menos 1 distância por raio.");
-  if (!(radiusStep > 0)) throw new InputError("O passo radial deve ser positivo.");
-  if (!(angleStepDeg > 0) || 360 % angleStepDeg !== 0) throw new InputError("O passo angular deve dividir 360° exatamente.");
+  if (!(Number.isInteger(nPlanes) && nPlanes >= 1)) throw new InputError("planes");
+  if (!(planeSpacing > 0)) throw new InputError("spacing");
+  if (!(Number.isInteger(nRadii) && nRadii >= 1)) throw new InputError("radii");
+  if (!(radiusStep > 0)) throw new InputError("radiusStep");
+  if (!(angleStepDeg > 0) || 360 % angleStepDeg !== 0) throw new InputError("angle");
   return { ...config, nRays: Math.round(360 / angleStepDeg) };
 }
 

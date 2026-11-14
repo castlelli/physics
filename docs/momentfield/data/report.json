@@ -1,0 +1,62 @@
+{
+ "cases": {
+  "relatorio": {
+   "title": "Exemplo do relatório",
+   "force_point": [
+    1.0,
+    0.0,
+    2.0
+   ],
+   "force": [
+    2.0,
+    1.0,
+    -1.5
+   ],
+   "config": {
+    "n_planes": 3,
+    "plane_spacing": 1.5,
+    "angle_step_deg": 60.0,
+    "n_radii": 2,
+    "radius_step": 1.0
+   },
+   "proof": {
+    "n_poles": 500,
+    "relative": {
+     "axial_component": 6.934808172557997e-17,
+     "magnitude": 1.8036635755016147e-16,
+     "translation": 2.2090277138114186e-16,
+     "rotation": 2.324138197065977e-16
+    }
+   }
+  },
+  "campo1": {
+   "title": "Exemplo do professor (Campo1)",
+   "force_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "force": [
+    1.0,
+    2.0,
+    3.0
+   ],
+   "config": {
+    "n_planes": 5,
+    "plane_spacing": 1.0,
+    "angle_step_deg": 60.0,
+    "n_radii": 3,
+    "radius_step": 0.75
+   },
+   "proof": {
+    "n_poles": 500,
+    "relative": {
+     "axial_component": 7.930737131252823e-17,
+     "magnitude": 1.1900963589895061e-16,
+     "translation": 2.3987158978712593e-16,
+     "rotation": 2.6777168077263887e-16
+    }
+   }
+  }
+ }
+}

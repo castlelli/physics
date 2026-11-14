@@ -1,0 +1,275 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[brazilian]{babel}
+\usepackage[a4paper,textwidth=16cm,top=2.4cm,bottom=2.4cm,headheight=14pt,headsep=0.8cm,footskip=1.0cm]{geometry}
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+% Times New Roman em todo o documento. Ela não tem tabela de matemática: letras e números da matemática
+% vêm dela, e os demais símbolos da TeX Gyre Termes Math, um clone da Times.
+\setmainfont{times.ttf}[Path=./, BoldFont=timesbd.ttf, ItalicFont=timesi.ttf, BoldItalicFont=timesbi.ttf]
+\setmathfont{texgyretermes-math.otf}
+\setmathfont{timesi.ttf}[Path=./, range={it/{latin,Latin,greek,Greek}->up}]
+\setmathfont{times.ttf}[Path=./, range={up/{num,latin,Latin,greek,Greek}}]
+\setmathrm{times.ttf}[Path=./, BoldFont=timesbd.ttf, ItalicFont=timesi.ttf, BoldItalicFont=timesbi.ttf]
+\setmonofont{lmmono10-regular.otf}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{needspace}
+\usepackage{etoolbox}
+\usepackage{booktabs,array,tabularx}
+\usepackage{fancyvrb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,decorations.pathreplacing}
+\usepackage[font=small,labelfont=bf,labelsep=period,margin=0.3cm]{caption}
+\usepackage[section]{placeins}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\urlstyle{same}
+\hypersetup{pdftitle={Campo de momentos de uma força}, pdfauthor={Vinicius Sampaio Castelli de Deus}, pdfsubject={PME3100 Mecânica I}}
+
+\titleformat{\section}{\large\bfseries}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.5em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.35em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small PME3100 - Campo de momentos}
+\fancyhead[R]{\small Vinicius S. Castelli de Deus, NUSP 17864509}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Lista de referências no formato da NBR 6023: alinhada à esquerda, espaço simples, separada por uma linha.
+\newcommand\entradaref[1]{\par{\raggedright #1\par}\vspace{0.75em}}
+\newenvironment{referencias}{\small\setlength{\parskip}{0pt}\setlength{\parindent}{0pt}}{}
+
+\newcommand\linhacapa[3]{\node[anchor=base] at ($(o)+(297.64pt,{-(#1+0.89*#2)*1pt})$) {\fontsize{#2}{#2}\selectfont\frenchspacing #3};}
+\newcommand\linhadireita[2]{\node[anchor=base east] at ($(o)+(526.3pt,{-(#1+0.89*12)*1pt})$) {\fontsize{12}{12}\selectfont\frenchspacing #2};}
+
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0.25em}
+\renewcommand{\arraystretch}{1.16}
+\setlist{nosep,leftmargin=1.2em,topsep=0.2em}
+\numberwithin{equation}{section}
+\AtBeginEnvironment{tabular}{\small}
+\newcommand\vet[1]{\vec{#1}}
+
+\begin{document}
+%# ================================================================== CAPA (mesmo modelo da Optativa 9)
+\setcounter{page}{0}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay,every node/.style={inner sep=0,text=black}]
+  \coordinate (o) at (current page.north west);
+  \node[anchor=north west] at ($(o)+(29.1pt,-12pt)$) {\includegraphics[width=133.5pt]{brasao_usp.png}};
+  \node[anchor=north east] at ($(o)+(567.5pt,-36.8pt)$) {\includegraphics[width=159pt]{logo_poli.png}};
+  \linhacapa{264.5}{14}{UNIVERSIDADE DE SÃO PAULO}
+  \linhacapa{290}{14}{ESCOLA POLITÉCNICA}
+  \linhacapa{315.5}{14}{Ciclo Básico}
+  \linhacapa{341}{14}{PME3100 - Mecânica I}
+  \linhacapa{388.5}{18}{Optativa 1}
+  \linhacapa{420.7}{18}{Campo de momentos de uma força}
+  \linhacapa{449}{12}{Versão interativa: \href{\VAR{site}}{\textcolor[HTML]{0563C1}{\underline{\nolinkurl{\VAR{site}}}}}}
+  \linhadireita{474.3}{Vinicius Castelli}
+  \linhadireita{496.1}{NUSP: \textbf{17864509}}
+  \linhadireita{539.6}{Professor:}
+  \linhadireita{561.3}{Prof. Dr. Flavius Portella Ribas Martins}
+  \linhacapa{695.1}{12}{São Paulo}
+  \linhacapa{716.8}{12}{2026}
+\end{tikzpicture}
+\null\newpage
+%# ================================================================== RESUMO
+\thispagestyle{empty}
+\section*{Resumo}
+Uma força $\vet F$ aplicada no ponto $P$ tem, em relação a um polo $O$, o momento $\vet M(O)=(P-O)\wedge\vet F$.
+Este trabalho desenha esse campo sobre polos dispostos em planos normais à linha de ação, igualmente espaçados,
+com seis raios a $60^\circ$ em cada plano, e demonstra que ele é axissimétrico em torno da linha de ação:
+$\vet M(O)$ depende apenas da posição de $O$ em relação ao eixo, tem módulo $|\vet F|$ vezes a distância ao eixo
+e é perpendicular ao plano que contém o eixo e o polo. A demonstração é feita de três formas: algebricamente
+(Seção~2), por três vistas do campo exigidas pelo professor (Seções~4 a 6) e numericamente, com erros da ordem
+do arredondamento da máquina (Seção~7).
+
+Uma versão interativa deste trabalho, com o mesmo cálculo executado no navegador, está em \url{\VAR{site}}.
+Nela, $P$, $\vet F$ e a amostragem podem ser alterados, e os cortes são refeitos na hora.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figs/perspectiva.pdf}
+\caption{Campo de momentos de $\vet F=\VAR{r.F}$ aplicada em $P=\VAR{r.P}$, visto de duas posições.}
+\end{figure}
+
+\newpage
+%# ================================================================== 1 ENUNCIADO
+\section{O que se pede}
+Dados $\vet F=(F_x,F_y,F_z)$ e o ponto de aplicação $P=(P_x,P_y,P_z)$, o programa deve desenhar o campo de
+momentos $\vet M(O)=(P-O)\wedge\vet F$ com as convenções do enunciado:
+\begin{enumerate}
+\item $\vet F$ e sua linha de ação em \textcolor[HTML]{D62728}{vermelho};
+\item os momentos $\vet M(O)$ em preto;
+\item linhas tracejadas \textcolor[HTML]{2CA02C}{verdes} de cada polo $O$ ao pé $Q$ da perpendicular baixada de $O$ sobre a linha de ação;
+\item linhas tracejadas \textcolor[HTML]{1F5FD6}{azuis} da ponta de cada $\vet M(O)$ ao mesmo $Q$;
+\item polos $O$ em planos normais à linha de ação, igualmente espaçados;
+\item em cada plano, raios $Q\to O$ separados de $60^\circ$.
+\end{enumerate}
+Por orientação do professor, o programa deve \emph{provar} a axissimetria, e não só sugeri-la, com três vistas:
+uma perspectiva do campo inteiro, um corte normal ao eixo e um corte que contém o eixo. Um corte é um
+\emph{filtro dos dados}: só os polos do plano escolhido são desenhados. Girar a câmera mantendo todos os
+polos produz uma figura confusa que não demonstra nada.
+
+%# ================================================================== 2 TEORIA
+\section{Por que o campo é axissimétrico}
+Seja $\vet u=\vet F/|\vet F|$. Todo vetor $O-P$ se decompõe numa parte ao longo do eixo e numa parte normal a ele:
+\begin{equation}
+O-P=s\,\vet u+\vet d,\qquad s=(O-P)\cdot\vet u,\qquad \vet d\perp\vet u .
+\end{equation}
+O pé da perpendicular é $Q=P+s\,\vet u$, e $\vet d=O-Q$ é o vetor que vai do eixo ao polo. Como $\vet u\wedge\vet F=\vet 0$,
+\begin{equation}
+\vet M(O)=(P-O)\wedge\vet F=-(s\,\vet u+\vet d)\wedge\vet F=\vet F\wedge\vet d .
+\label{eq:FwedgeD}
+\end{equation}
+Dessa única linha saem todas as propriedades do campo:
+\begin{itemize}
+\item $\vet M(O)$ não depende de $s$: polos na mesma reta paralela ao eixo têm o mesmo momento (invariância por translação ao longo do eixo);
+\item $|\vet M(O)|=|\vet F|\,|\vet d|$, porque $\vet F\perp\vet d$: o módulo cresce linearmente com a distância ao eixo e é nulo sobre ele;
+\item $\vet M(O)\perp\vet u$ e $\vet M(O)\perp\vet d$: o momento é tangente à circunferência de centro $Q$ que passa por $O$, no plano normal ao eixo;
+\item se $R$ é uma rotação em torno da linha de ação, $R\vet F=\vet F$ e $R$ preserva o produto vetorial, logo
+$\vet M(P+R(O-P))=\vet F\wedge R\vet d=R(\vet F\wedge\vet d)=R\,\vet M(O)$: girar o polo gira o momento do mesmo ângulo.
+\end{itemize}
+A primeira e a última propriedade juntas são a axissimetria. A terceira explica as linhas tracejadas do enunciado:
+$O$, $Q$ e a ponta de $\vet M(O)$ estão no plano normal ao eixo que passa por $O$, e o triângulo $O$--$Q$--ponta
+é retângulo em $O$, com catetos $|\vet d|$ e $k|\vet M|$, onde $k$ é a escala de desenho.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[>={Latex[length=2.2mm,width=1.6mm]}, line cap=round, scale=1.05]
+  \draw[thick,color={rgb,255:red,214;green,39;blue,40}] (0,-0.4)--(0,3.4);
+  \draw[->,very thick,color={rgb,255:red,214;green,39;blue,40}] (0,0.4)--(0,1.6) node[left=2pt] {$\vet F$};
+  \fill[color={rgb,255:red,214;green,39;blue,40}] (0,0.4) circle (1.6pt) node[left=3pt] {$P$};
+  \fill (0,2.3) circle (1.4pt) node[left=3pt] {$Q$};
+  \fill (3,2.3) circle (1.6pt) node[below right=1pt] {$O$};
+  \draw[dashed,color={rgb,255:red,44;green,160;blue,44}] (3,2.3)--(0,2.3) node[midway,below] {$\vet d$};
+  \draw[->,thick] (3,2.3)--(3.9,3.5) node[right] {$k\,\vet M(O)$};
+  \draw[dashed,color={rgb,255:red,31;green,95;blue,214}] (3.9,3.5)--(0,2.3);
+  \draw[dotted] (0,0.4)--(3,2.3);
+  \node at (2.0,1.05) {$O-P$};
+  \draw (2.78,2.3)--(2.78,2.52)--(3,2.52);
+  \draw[decorate,decoration={brace,amplitude=4pt,mirror}] (-0.75,0.4)--(-0.75,2.3) node[midway,left=5pt] {$s$};
+  \node[anchor=west,font=\small,align=left] at (5.0,1.9) {Vista em perspectiva livre: o momento\\ sai do plano do desenho (é normal a $\vet u$ e a $\vet d$).\\ O ângulo reto em $O$ está no plano normal ao eixo.};
+\end{tikzpicture}
+\caption{Decomposição de $O-P$ e o triângulo $O$--$Q$--ponta de $k\,\vet M(O)$.}
+\end{figure}
+
+%# ================================================================== 3 CONSTRUÇÃO
+\section{Construção dos polos}
+Para o exemplo do relatório, $P=\VAR{r.P}$ e $\vet F=\VAR{r.F}$, com $|\vet F|=\VAR{r.normF}$. O programa monta
+uma base ortonormal destra adaptada à linha de ação:
+$\vet u=\VAR{r.u}$, $\vet v_1=\VAR{r.v1}$ e $\vet v_2=\vet u\wedge\vet v_1=\VAR{r.v2}$.
+O vetor $\vet v_1$ é $\vet u\wedge\vet e$, normalizado, em que $\vet e$ é o eixo coordenado menos alinhado com $\vet u$
+(o produto vetorial mais bem condicionado). Os polos são
+\begin{equation}
+O=P+s_i\,\vet u+r_k\,(\cos\theta_j\,\vet v_1+\sin\theta_j\,\vet v_2),
+\end{equation}
+com $\VAR{r.n_planes}$ planos $s_i$ centrados em $P$ e espaçados de $\VAR{r.spacing}$, $\VAR{r.n_rays}$ raios
+$\theta_j=j\cdot\VAR{r.step}^\circ$ e $\VAR{r.n_radii}$ distâncias $r_k=k\cdot\VAR{r.radius_step}$, ao todo $\VAR{r.n_samples}$
+polos. Nenhum polo fica sobre o eixo, onde $\vet d=\vet 0$ e a direção radial não é definida.
+
+O maior momento amostrado vale $\VAR{r.max_M}$, maior que as distâncias da figura. Por isso os momentos são
+desenhados multiplicados por $k=\VAR{r.moment_scale}$, que deixa o maior deles com 60\% do maior raio. As linhas azuis
+vão até a ponta \emph{desenhada}: o ângulo reto do triângulo é preservado, mas o comprimento do cateto $k|\vet M|$
+não é métrico.
+
+%# ================================================================== 4 PERSPECTIVA
+\section{Vista em perspectiva}
+A figura da página de resumo mostra todos os polos, sem filtro, de duas posições do observador, com eixos em
+escala igual (sem ela, os ângulos retos apareceriam deformados). Em cada plano, as setas pretas giram em torno
+da linha vermelha, e as verdes e azuis formam leques de triângulos retângulos com vértice comum no pé $Q$ do plano.
+A perspectiva sugere a simetria, mas não a prova: para isso servem os dois cortes a seguir.
+
+%# ================================================================== 5 CORTE NORMAL
+\section{Corte normal ao eixo}
+Só os polos de um plano normal ao eixo são desenhados, vistos ao longo de $\vet u$, com $\vet v_1$ e $\vet v_2$ no
+plano da página (Figura~\ref{fig:normal}, à esquerda). Como $\vet u=\vet v_1\wedge\vet v_2$, a força aponta para o
+leitor ($\odot$). Os momentos são tangentes às circunferências centradas no eixo, e o desenho é um catavento: girá-lo
+de $60^\circ$ leva cada polo no polo do raio seguinte e cada seta na seta desse polo. O programa confere isso: o maior
+desvio, relativo a $\max|\vet M|$, é $\VAR{r.rotation_spread}$.
+
+À direita, os $\VAR{r.n_planes}$ planos estão sobrepostos nas mesmas coordenadas $(\vet v_1,\vet v_2)$. As setas de
+todos coincidem: a maior diferença entre o momento de um polo e o do polo correspondente em outro plano é
+$\VAR{r.plane_spread}\cdot\max|\vet M|$. É a invariância por translação ao longo do eixo.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figs/corte_normal.pdf}
+\caption{Corte normal ao eixo. À esquerda, o plano do meio com as linhas do enunciado; à direita, todos os planos
+sobrepostos (marcadores diferentes por plano). O pé $Q$ é o centro da figura.}
+\label{fig:normal}
+\end{figure}
+
+%# ================================================================== 6 CORTE AXIAL
+\section{Corte que contém o eixo}
+Agora só os polos do plano que contém a linha de ação e a direção $\vet v_1$ são desenhados: os raios de $0^\circ$ e
+$180^\circ$ de cada plano normal. Na página ficam $\vet v_1$ (horizontal, distância ao eixo com sinal $d$) e $\vet u$
+(vertical), e a normal à página é $\vet n=\vet v_1\wedge\vet u=-\vet v_2$. Pela equação~\eqref{eq:FwedgeD}, com
+$\vet d=d\,\vet v_1$,
+\begin{equation}
+\vet M(O)=|\vet F|\,d\;\vet u\wedge\vet v_1=|\vet F|\,d\,\vet v_2=-|\vet F|\,d\,\vet n .
+\end{equation}
+O momento é normal à página, entra nela à direita do eixo e sai à esquerda, com módulo proporcional a $|d|$
+(Figura~\ref{fig:axial}). O programa confere que a componente de $\vet M$ no plano da página é nula e que
+$\vet M\cdot\vet n=-|\vet F|\,d$, com desvio máximo de $\VAR{r.axial_line}\cdot\max|\vet M|$. Como os momentos são normais
+à página, a ponta de cada um projeta-se sobre o próprio polo, e a linha azul coincide com a verde; a vista levemente
+inclinada da Figura~\ref{fig:inclinada} mostra os vetores saindo do plano.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figs/corte_axial.pdf}
+\caption{Corte que contém o eixo. À esquerda, os momentos como $\odot$ e $\otimes$, com raio proporcional a $|\vet M|$;
+à direita, a componente normal à página em função de $d$: os polos de todos os planos caem na mesma reta, que passa pela origem.}
+\label{fig:axial}
+\end{figure}
+\begin{figure}[H]\centering
+\includegraphics[width=0.62\linewidth]{figs/inclinada.pdf}
+\caption{Os mesmos polos do corte axial, com a câmera $20^\circ$ acima da normal ao plano.}
+\label{fig:inclinada}
+\end{figure}
+
+%# ================================================================== 7 VERIFICAÇÃO
+\section{Verificação numérica}
+Além dos polos da figura, o programa sorteia 500 polos num cubo de lado 10 em torno de $P$ e mede, relativo ao maior
+$|\vet M|$ sorteado, o pior erro de cada propriedade da Seção~2: a componente de $\vet M$ ao longo do eixo, o desvio de
+$|\vet M|$ em relação a $|\vet F||\vet d|$, a variação de $\vet M$ quando o polo é transladado ao longo do eixo e a
+diferença entre $\vet M(R\,O)$ e $R\,\vet M(O)$ para uma rotação sorteada. A geração do relatório para se algum
+valor passar de $\VAR{r.tolerance}$.
+
+\begin{table}[H]\centering\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Caso & $\max|\vet M\cdot\vet u|$ & $\max\big||\vet M|-|\vet F||\vet d|\big|$ & translação & rotação\\
+\midrule
+\BLOCK{for c in r.proofs}
+\VAR{c.title} & $\VAR{c.axial_component}$ & $\VAR{c.magnitude}$ & $\VAR{c.translation}$ & $\VAR{c.rotation}$\\
+\BLOCK{endfor}
+\bottomrule
+\end{tabular}
+\caption{Erros relativos ao maior $|\vet M|$, em 500 polos sorteados. O exemplo do professor é o do arquivo
+Campo1 do e-Disciplinas, $\vet F=(1;\ 2;\ 3)$ aplicada na origem.}
+\end{table}
+Todos os erros estão na ordem de $10^{-16}$, o arredondamento da aritmética de dupla precisão: as propriedades valem
+exatamente, e não por aproximação.
+
+%# ================================================================== 8 PROGRAMA
+\section{O programa}
+O código está em \url{https://github.com/castlelli/physics/tree/main/momentfield}. O módulo \texttt{modelo.py} tem
+a matemática (base, decomposição, campo, amostragem e cortes), sem desenho nem arquivos; \texttt{verificacao.py},
+as verificações da Seção~7; \texttt{figuras.py}, as figuras; e \texttt{relatorio.py}, este documento.
+A versão interativa repete \texttt{modelo.py} em JavaScript, e um teste compara os dois com um mesmo conjunto de
+polos de referência, com tolerância de $10^{-12}$.
+
+\begin{Verbatim}[fontsize=\small,frame=single,framesep=2mm]
+python -m codigo                       # pergunta P e F
+python -m codigo --P 1 0 2 --F 2 1 -1.5
+python -m codigo --caso campo1         # exemplo do professor
+python -m codigo --todos               # figuras, este PDF e os dados do site
+\end{Verbatim}
+
+\end{document}

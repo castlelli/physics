@@ -1,4 +1,6 @@
-// Shared drawing helpers: theme colours, pt-BR number formatting and a small canvas plot frame.
+// Shared drawing helpers: theme colours, localised number formatting and a small canvas plot frame.
+
+import { T } from "./i18n.js";
 
 const MINUS = "−";
 let cachedTheme = null;
@@ -43,10 +45,10 @@ export function withAlpha(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-// pt-BR: decimal comma and a typographic minus sign.
+// Decimal comma (pt-BR) or point (en) and a typographic minus sign.
 export function fmt(value, digits = 2) {
   if (!Number.isFinite(value)) return "–";
-  const fixed = Math.abs(value).toFixed(digits).replace(".", ",");
+  const fixed = Math.abs(value).toFixed(digits).replace(".", T.decimal);
   return (value < 0 && Number(value.toFixed(digits)) !== 0 ? MINUS : "") + fixed;
 }
 
@@ -65,7 +67,7 @@ export function superscript(n) {
 
 export function trimmed(value, digits = 3) {
   const text = fmt(value, digits);
-  return text.includes(",") ? text.replace(/0+$/, "").replace(/,$/, "") : text;
+  return text.includes(T.decimal) ? text.replace(/0+$/, "").replace(/[.,]$/, "") : text;
 }
 
 export function niceTicks(lo, hi, target = 5) {

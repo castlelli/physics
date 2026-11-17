@@ -3,32 +3,26 @@
 import { coefficients, defaultStep, detectPeriod, energy, forcingPeriod, potential, rk4Step, DIVERGENCE_LIMIT } from "./model.js";
 import { Plot, fitCanvas, fmt, niceTicks, onResize, onThemeChange, pointerPosition, reducedMotion, theme, trimmed, watchVisibility, withAlpha } from "./ui.js";
 import { playTrajectory } from "./audio.js";
+import { T } from "./i18n.js";
 
 const RING = 16384;
 const MAX_STROBE = 3000;
 const MAX_STEPS_PER_FRAME = 6000;
 
 const CONTROLS = [
-  { group: "Sistema", key: "m", symbol: "m", name: "massa", unit: "kg", min: 0.2, max: 5, step: 0.01 },
-  { group: "Sistema", key: "k1", symbol: "k<sub>1</sub>", name: "mola linear", unit: "N/m", min: -2, max: 2, step: 0.01 },
-  { group: "Sistema", key: "k2", symbol: "k<sub>2</sub>", name: "mola cúbica", unit: "N/m³", min: 0, max: 3, step: 0.01 },
-  { group: "Sistema", key: "c", symbol: "c", name: "amortecedor", unit: "N·s/m", min: 0, max: 1, step: 0.005 },
-  { group: "Força", key: "A", symbol: "A", name: "amplitude", unit: "N", min: 0, max: 1.5, step: 0.001 },
-  { group: "Força", key: "omega", symbol: "ω", name: "frequência", unit: "rad/s", min: 0.2, max: 3, step: 0.01 },
-  { group: "Partida", key: "x0", symbol: "x(0)", name: "posição", unit: "m", min: -2, max: 2, step: 0.001 },
-  { group: "Partida", key: "v0", symbol: "ẋ(0)", name: "velocidade", unit: "m/s", min: -2.5, max: 2.5, step: 0.001 },
-  { group: "Tempo", key: "tmax", symbol: "t<sub>máx</sub>", name: "observação", unit: "s", min: 10, max: 1000, step: 1 },
-  { group: "Tempo", key: "speed", symbol: "ritmo", name: "da simulação", unit: "s/s", min: 0.5, max: 200, step: 0.5, log: true },
+  { group: T.groups.system, key: "m", symbol: "m", name: T.controls.m, unit: "kg", min: 0.2, max: 5, step: 0.01 },
+  { group: T.groups.system, key: "k1", symbol: "k<sub>1</sub>", name: T.controls.k1, unit: "N/m", min: -2, max: 2, step: 0.01 },
+  { group: T.groups.system, key: "k2", symbol: "k<sub>2</sub>", name: T.controls.k2, unit: "N/m³", min: 0, max: 3, step: 0.01 },
+  { group: T.groups.system, key: "c", symbol: "c", name: T.controls.c, unit: "N·s/m", min: 0, max: 1, step: 0.005 },
+  { group: T.groups.force, key: "A", symbol: "A", name: T.controls.A, unit: "N", min: 0, max: 1.5, step: 0.001 },
+  { group: T.groups.force, key: "omega", symbol: "ω", name: T.controls.omega, unit: "rad/s", min: 0.2, max: 3, step: 0.01 },
+  { group: T.groups.start, key: "x0", symbol: "x(0)", name: T.controls.x0, unit: "m", min: -2, max: 2, step: 0.001 },
+  { group: T.groups.start, key: "v0", symbol: "ẋ(0)", name: T.controls.v0, unit: "m/s", min: -2.5, max: 2.5, step: 0.001 },
+  { group: T.groups.time, key: "tmax", symbol: T.tmaxSymbol, name: T.controls.tmax, unit: "s", min: 10, max: 1000, step: 1 },
+  { group: T.groups.time, key: "speed", symbol: T.speedSymbol, name: T.controls.speed, unit: "s/s", min: 0.5, max: 200, step: 0.5, log: true },
 ];
 
-const CASE_NOTES = {
-  A: "Período 5. Depois de um transiente irregular, o bloco repete o mesmo percurso a cada cinco períodos da força: sobram cinco pontos na seção de Poincaré.",
-  B: "Sem força. O amortecimento leva o bloco ao repouso em x = +1 ou x = −1. Clique no espaço de fases para escolher de onde ele parte.",
-  C: "Caos. A trajetória nunca se repete, e os pontos da seção de Poincaré desenham aos poucos o atrator estranho.",
-  D: "Poço único (k₁ positivo). Qualquer partida termina na mesma órbita de período 1.",
-  E: "Dois atratores. Com força fraca o bloco fica preso em um dos poços, e a partida decide em qual.",
-  free: "Dados livres. Os controles são as entradas do enunciado: mude qualquer um e a integração continua do estado atual.",
-};
+const CASE_NOTES = T.caseNotes;
 
 export function createLab(report) {
   const root = document.getElementById("lab");
@@ -134,12 +128,12 @@ export function createLab(report) {
   function updateRegime() {
     const p = state.params;
     if (p.A === 0) {
-      regime = "sem força";
+      regime = T.regimeUnforced;
       return;
     }
     const count = strobe.t.length;
     if (count < 14) {
-      regime = "medindo…";
+      regime = T.regimeMeasuring;
       return;
     }
     const take = Math.min(count, 52);
@@ -149,7 +143,7 @@ export function createLab(report) {
       points[2 * i + 1] = strobe.v[count - take + i];
     }
     const period = detectPeriod(points, 2e-3, Math.min(16, Math.floor(take / 3)));
-    regime = period > 0 ? `período ${period}` : "sem repetição";
+    regime = period > 0 ? T.regimePeriod(period) : T.regimeNone;
   }
 
   function advance(seconds) {
@@ -175,7 +169,7 @@ export function createLab(report) {
       if (!(Math.abs(sim.x) < DIVERGENCE_LIMIT && Math.abs(sim.v) < DIVERGENCE_LIMIT)) {
         state.diverged = true;
         state.running = false;
-        setStatus("A solução divergiu. Reinicie ou mude os dados.");
+        setStatus(T.diverged);
         break;
       }
       push(sim.t, sim.x, sim.v);
@@ -194,7 +188,7 @@ export function createLab(report) {
       if (state.limitActive && sim.t >= state.tmax) {
         state.limitActive = false;
         state.running = false;
-        setStatus(`Tempo de observação de ${trimmed(state.tmax, 1)} s atingido. Continue para seguir além dele.`);
+        setStatus(T.limitReached(trimmed(state.tmax, 1)));
         break;
       }
     }
@@ -293,7 +287,7 @@ export function createLab(report) {
       ctx.textAlign = "right";
       ctx.textBaseline = "top";
       const { left, top, width } = phasePlot.inner;
-      ctx.fillText(`partir de (${fmt(phasePlot.invX(hover[0]), 2)}; ${fmt(phasePlot.invY(hover[1]), 2)})`, left + width - 6, top + 5);
+      ctx.fillText(T.startFrom(`(${fmt(phasePlot.invX(hover[0]), 2)}${T.pointSeparator}${fmt(phasePlot.invY(hover[1]), 2)})`), left + width - 6, top + 5);
     }
   }
 
@@ -528,7 +522,7 @@ export function createLab(report) {
     ctx.font = `15px ${colors.sans}`;
     ctx.fillStyle = colors.ink2;
     ctx.textAlign = "left";
-    ctx.fillText("energia potencial V(x) − F(t)·x", wallX + 8, ground + 12);
+    ctx.fillText(T.potential, wallX + 8, ground + 12);
     ctx.textAlign = "right";
     ctx.fillText("x [m]", width - 10, wellBottom + 5);
   }
@@ -568,7 +562,7 @@ export function createLab(report) {
   }
 
   function syncTransport() {
-    nodes.play.textContent = state.running ? "Pausar" : sim.t > 0 ? "Continuar" : "Iniciar";
+    nodes.play.textContent = state.running ? T.pause : sim.t > 0 ? T.resume : T.start;
     nodes.play.setAttribute("aria-pressed", String(state.running));
   }
 
@@ -664,7 +658,7 @@ export function createLab(report) {
       button.className = "case-chip";
       button.dataset.case = key;
       button.style.setProperty("--chip", `var(--case-${key.toLowerCase()})`);
-      button.innerHTML = `<span class="case-letter">${key}</span><span class="case-title">${item.title}</span>`;
+      button.innerHTML = `<span class="case-letter">${key}</span><span class="case-title">${T.cases[key] ?? item.title}</span>`;
       button.addEventListener("click", () => loadCase(key));
       nodes.cases.appendChild(button);
     }
@@ -673,7 +667,7 @@ export function createLab(report) {
     free.className = "case-chip";
     free.dataset.case = "";
     free.style.setProperty("--chip", "var(--case-free)");
-    free.innerHTML = `<span class="case-letter">∗</span><span class="case-title">Dados livres</span>`;
+    free.innerHTML = `<span class="case-letter">∗</span><span class="case-title">${T.free}</span>`;
     free.addEventListener("click", () => {
       state.caseKey = null;
       syncInputs();
@@ -738,7 +732,7 @@ export function createLab(report) {
   });
   nodes.listen.addEventListener("click", () => {
     const seconds = playTrajectory(state.params, sim.x, sim.v, sim.t);
-    setStatus(seconds ? "Som: x(t) acelerado até a força virar uma nota de 220 Hz." : "Som indisponível neste navegador.");
+    setStatus(seconds ? T.sound : T.noSound);
   });
 
   buildCases();

@@ -2,6 +2,7 @@
 
 import { coefficients, forcingPeriod, integrate, strobe } from "./model.js";
 import { Plot, createTooltip, offsetWithin, fmt, fmtSci, onResize, onThemeChange, pointerPosition, reducedMotion, superscript, theme, trimmed, watchVisibility } from "./ui.js";
+import { T } from "./i18n.js";
 
 const PERIODS = 60;
 const REVEAL_SECONDS = 4.5;
@@ -24,7 +25,7 @@ export function createButterfly(report, lab) {
   const tooltip = createTooltip(host);
   const margin = { left: 48, right: 14, top: 10, bottom: 32 };
   const xPlot = new Plot(xCanvas, { xLabel: "t [s]", yLabel: "x [m]", margin, xTickFormat: (t) => trimmed(t, 0) });
-  const dPlot = new Plot(dCanvas, { xLabel: "t [s]", yLabel: "distância [m]", margin, xTickFormat: (t) => trimmed(t, 0), yTickFormat: (e) => `10${superscript(Math.round(e))}` });
+  const dPlot = new Plot(dCanvas, { xLabel: "t [s]", yLabel: T.distanceAxis, margin, xTickFormat: (t) => trimmed(t, 0), yTickFormat: (e) => `10${superscript(Math.round(e))}` });
 
   let source = "C";
   let run = null;
@@ -35,10 +36,10 @@ export function createButterfly(report, lab) {
   let pendingAuto = true;
 
   const options = [
-    ["C", "Caso C"],
-    ["A", "Caso A"],
-    ["D", "Caso D"],
-    ["lab", "Dados do laboratório"],
+    ["C", T.caseTitle("C")],
+    ["A", T.caseTitle("A")],
+    ["D", T.caseTitle("D")],
+    ["lab", T.labData],
   ];
   for (const [key, label] of options) {
     const button = document.createElement("button");
@@ -136,20 +137,20 @@ export function createButterfly(report, lab) {
   function writeTiles(finished) {
     if (!finished) {
       tile.slope.textContent = "…";
-      tile["slope-note"].textContent = "Integrando as duas trajetórias.";
+      tile["slope-note"].textContent = T.integrating;
       tile.horizon.textContent = "…";
       tile["horizon-note"].textContent = "";
     } else {
       tile.slope.textContent = `${fmt(run.slope, 3)} 1/s`;
-      const span = `entre t = ${trimmed(run.first.t[run.from], 0)} s e ${trimmed(run.first.t[run.to], 0)} s`;
-      const what = run.pairs > 1 ? `Reta ajustada à média de ln d de ${run.pairs} duplas` : "Reta ajustada a ln d";
+      const span = T.span(trimmed(run.first.t[run.from], 0), trimmed(run.first.t[run.to], 0));
+      const what = run.pairs > 1 ? T.fitPairs(run.pairs) : T.fitOne;
       tile["slope-note"].textContent = run.grows
-        ? `${what}, ${span}. A distância dobra a cada ${fmt(Math.LN2 / run.slope, 1)} s.`
+        ? T.doubles(what, span, fmt(Math.LN2 / run.slope, 1))
         : run.slope < 0
-          ? `${what}, ${span}. A distância cai pela metade a cada ${fmt(-Math.LN2 / run.slope, 1)} s: não há sensibilidade.`
-          : `${what}, ${span}. A distância não chega a crescer de forma sustentada.`;
-      tile.horizon.textContent = run.horizon !== null ? `${trimmed(run.first.t[run.horizon], 0)} s` : "nunca";
-      tile["horizon-note"].textContent = run.horizon !== null ? "Depois disso, prever um bloco pelo outro deixa de fazer sentido." : "Os dois blocos acabam no mesmo movimento: a previsão vale para sempre.";
+          ? T.halves(what, span, fmt(-Math.LN2 / run.slope, 1))
+          : T.flat(what, span);
+      tile.horizon.textContent = run.horizon !== null ? `${trimmed(run.first.t[run.horizon], 0)} s` : T.never;
+      tile["horizon-note"].textContent = run.horizon !== null ? T.horizonNote : T.neverNote;
     }
     const numbers = report.numbers;
     const key = run.caseKey;
@@ -157,13 +158,13 @@ export function createButterfly(report, lab) {
       tile.report.textContent = `${fmt(numbers.lyapunov[key], 3)} 1/s`;
       tile["report-note"].textContent =
         key === "A"
-          ? `Negativo: em regime, vizinhas convergem. Antes dele o transiente é caótico, com taxa ${fmt(numbers.transient_lyapunov_A, 3)} 1/s.`
+          ? T.reportA(fmt(numbers.transient_lyapunov_A, 3))
           : key === "C"
-            ? "Pela equação variacional, em 32 trajetórias longas. A medida ao lado é uma amostra menor, direto das distâncias."
-            : "Negativo: as trajetórias vizinhas convergem.";
+            ? T.reportC
+            : T.reportNegative;
     } else {
       tile.report.textContent = "–";
-      tile["report-note"].textContent = "O relatório não tem medida para estes dados.";
+      tile["report-note"].textContent = T.reportNone;
     }
   }
 
@@ -194,7 +195,7 @@ export function createButterfly(report, lab) {
       }
       crosshair(ctx, xPlot);
     });
-    legend(ctx, xPlot, [[color, "bloco 1"], [second, `bloco 2, partindo ${fmtSci(run.eps, 0)} m ao lado`]]);
+    legend(ctx, xPlot, [[color, T.block1], [second, T.block2(fmtSci(run.eps, 0))]]);
 
     const lowest = Math.max(-16, Math.min(Math.floor(Math.log10(run.eps)) - 1, Math.floor(Math.min(...run.logDistance, ...run.meanLog))));
     dPlot.setView(0, run.tmax, lowest, 1.6);
@@ -242,8 +243,8 @@ export function createButterfly(report, lab) {
     ctx.font = `15px ${colors.sans}`;
     ctx.textAlign = "left";
     ctx.textBaseline = "bottom";
-    ctx.fillText("0,1 m: blocos separados", dPlot.inner.left + 8, dPlot.py(Math.log10(SEPARATED)) - 5);
-    if (progress >= 1) legend(ctx, dPlot, run.pairs > 1 ? [[color, "esta dupla"], [colors.ink, `média de ${run.pairs} duplas`], [colors.ink2, "reta ajustada", true]] : [[color, "distância"], [colors.ink2, "reta ajustada", true]]);
+    ctx.fillText(T.separated, dPlot.inner.left + 8, dPlot.py(Math.log10(SEPARATED)) - 5);
+    if (progress >= 1) legend(ctx, dPlot, run.pairs > 1 ? [[color, T.thisPair], [colors.ink, T.pairMean(run.pairs)], [colors.ink2, T.fittedLine, true]] : [[color, T.distance], [colors.ink2, T.fittedLine, true]]);
   }
 
   function crosshair(ctx, plot) {
@@ -289,7 +290,7 @@ export function createButterfly(report, lab) {
     tooltip.show(
       left + px,
       top + py,
-      `t = <b>${fmt(run.first.t[i], 1)} s</b><br>bloco 1: <b>${fmt(run.first.x[i], 4)} m</b><br>bloco 2: <b>${fmt(run.second.x[i], 4)} m</b><br>dist\u00e2ncia: <b>${fmtSci(10 ** run.logDistance[i], 1)} m</b>`,
+      `t = <b>${fmt(run.first.t[i], 1)} s</b><br>${T.tipBlock1}: <b>${fmt(run.first.x[i], 4)} m</b><br>${T.tipBlock2}: <b>${fmt(run.second.x[i], 4)} m</b><br>${T.distance}: <b>${fmtSci(10 ** run.logDistance[i], 1)} m</b>`,
     );
     if (progress >= 1) draw();
   }

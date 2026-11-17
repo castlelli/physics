@@ -2,6 +2,7 @@
 
 import { coefficients, detectPeriod, forcingPeriod, integrate, lyapunovRun, strobe } from "./model.js";
 import { Plot, createTooltip, fmt, fmtSci, offsetWithin, onResize, onThemeChange, pointerPosition, superscript, theme, watchVisibility } from "./ui.js";
+import { T } from "./i18n.js";
 
 const TEST_TIME = 20;
 const REFERENCE_STEP = 0.0005;
@@ -15,7 +16,7 @@ function createConvergence(report) {
   const note = root.querySelector("[data-conv-note]");
   const tooltip = createTooltip(host);
   const power = (e) => `10${superscript(Math.round(e))}`;
-  const plot = new Plot(canvas, { xLabel: "passo h [s]", yLabel: "erro [m]", margin: { left: 52, right: 16, top: 12, bottom: 34 }, xTickFormat: power, yTickFormat: power, xTicks: 3, yTicks: 6 });
+  const plot = new Plot(canvas, { xLabel: T.stepAxis, yLabel: T.errorAxis, margin: { left: 52, right: 16, top: 12, bottom: 34 }, xTickFormat: power, yTickFormat: power, xTicks: 3, yTicks: 6 });
 
   const item = report.cases.C;
   const [x0, v0] = item.initial[0];
@@ -41,7 +42,7 @@ function createConvergence(report) {
     label.textContent = `h = ${fmt(h, 4)} s`;
     slider.style.setProperty("--fill", `${slider.value}%`);
     const standard = forcingPeriod(item) / 200;
-    note.textContent = `Com h = ${fmt(h, 4)} s o erro é ${fmtSci(error, 2)} m, e reduzir o passo à metade divide o erro por ${fmt(2 ** order, 1)} (ordem ${fmt(order, 2)}). O relatório usa h = T/200 = ${fmt(standard, 4)} s.`;
+    note.textContent = T.convNote(fmt(h, 4), fmtSci(error, 2), fmt(2 ** order, 1), fmt(order, 2), fmt(standard, 4));
     draw();
   }
 
@@ -113,9 +114,9 @@ function createConvergence(report) {
     const x = plot.inner.left + 14;
     let y = plot.inner.top + 42;
     const entries = [
-      ["dot", colors.cases.C, "calculado agora no navegador"],
-      ["ring", colors.ink, "valor do relatório (Python)"],
-      ["dash", colors.axis, "reta de inclinação 4"],
+      ["dot", colors.cases.C, T.liveDot],
+      ["ring", colors.ink, T.reportRing],
+      ["dash", colors.axis, T.slope4],
     ];
     for (const [kind, color, text] of entries) {
       ctx.strokeStyle = ctx.fillStyle = color;
@@ -149,7 +150,7 @@ function createConvergence(report) {
     });
     if (!best) return tooltip.hide();
     const [left, top] = offsetWithin(host, canvas);
-    tooltip.show(left + px, top + py, `h = <b>${fmt(best.point.h, 4)} s</b><br>navegador: <b>${fmtSci(best.point.error, 3)} m</b><br>relatório: <b>${fmtSci(cached.error[best.i], 3)} m</b>`);
+    tooltip.show(left + px, top + py, `h = <b>${fmt(best.point.h, 4)} s</b><br>${T.tipBrowser}: <b>${fmtSci(best.point.error, 3)} m</b><br>${T.tipReport}: <b>${fmtSci(cached.error[best.i], 3)} m</b>`);
   });
   canvas.addEventListener("pointerleave", () => tooltip.hide());
   slider.addEventListener("input", update);
@@ -182,7 +183,7 @@ function createCheck(report, errorFor) {
 
   const rows = [
     {
-      name: "Período do caso A, em períodos da força",
+      name: T.rows.periodA,
       expected: numbers.period_A,
       digits: 0,
       *compute() {
@@ -190,7 +191,7 @@ function createCheck(report, errorFor) {
       },
     },
     {
-      name: "x final do caso A [m], após 12 mil passos",
+      name: T.rows.finalA,
       expected: numbers.endpoint_A[0],
       digits: 10,
       *compute() {
@@ -199,11 +200,11 @@ function createCheck(report, errorFor) {
         return run.x[run.x.length - 1];
       },
     },
-    { name: "λ₁ do caso A [1/s]", expected: numbers.lyapunov.A, digits: 4, compute: () => lyapunov("A", 2000) },
-    { name: "λ₁ do caso C [1/s], uma trajetória", expected: numbers.lyapunov.C, digits: 4, compute: () => lyapunov("C", 6000) },
-    { name: "λ₁ do caso D [1/s]", expected: numbers.lyapunov.D, digits: 4, compute: () => lyapunov("D", 2000) },
+    { name: T.rows.lyapA, expected: numbers.lyapunov.A, digits: 4, compute: () => lyapunov("A", 2000) },
+    { name: T.rows.lyapC, expected: numbers.lyapunov.C, digits: 4, compute: () => lyapunov("C", 6000) },
+    { name: T.rows.lyapD, expected: numbers.lyapunov.D, digits: 4, compute: () => lyapunov("D", 2000) },
     {
-      name: "Amplitude do caso D [m]",
+      name: T.rows.ampD,
       expected: numbers.amplitude_D,
       digits: 6,
       *compute() {
@@ -215,7 +216,7 @@ function createCheck(report, errorFor) {
       },
     },
     {
-      name: "Ponto fixo do caso E, x [m]",
+      name: T.rows.fixedE,
       expected: numbers.fixed_points_E[0][0],
       digits: 6,
       *compute() {
@@ -223,7 +224,7 @@ function createCheck(report, errorFor) {
       },
     },
     {
-      name: "Erro do RK4 com h = 0,02 s [m]",
+      name: T.rows.rk4,
       expected: numbers.convergence.error[3],
       scientific: true,
       *compute() {
@@ -244,7 +245,7 @@ function createCheck(report, errorFor) {
       const live = body.querySelector(`[data-live="${i}"]`);
       const diff = body.querySelector(`[data-diff="${i}"]`);
       live.textContent = diff.textContent = "…";
-      status.textContent = `Calculando ${i + 1} de ${rows.length}`;
+      status.textContent = T.computing(i + 1, rows.length);
       await new Promise(requestAnimationFrame);
       const task = row.compute();
       let step = task.next();
@@ -261,7 +262,7 @@ function createCheck(report, errorFor) {
       diff.textContent = delta === 0 ? "0" : fmtSci(delta, 1);
       live.className = diff.className = "";
     }
-    status.textContent = `Refeito em ${fmt((performance.now() - started) / 1000, 1)} s nesta máquina.`;
+    status.textContent = T.redone(fmt((performance.now() - started) / 1000, 1));
     button.disabled = false;
     busy = false;
     done = true;

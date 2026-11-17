@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Duffing oscillator, live | PME3100</title>
+  <meta name="description" content="An interactive lab for the Duffing oscillator: real-time RK4 integration, Poincaré section, bifurcation diagram and basins of attraction.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="The Duffing oscillator, live">
+  <meta property="og:description" content="Real-time RK4 integration, Poincaré section, bifurcations and basins of attraction. PME3100, Poli-USP.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2313161b'/%3E%3Cpath d='M4 22c5 0 5-12 12-12s7 12 12 12' fill='none' stroke='%23eb6834' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="alternate" hreflang="pt-BR" href="https://castlelli.github.io/physics/duffing/">
+  <link rel="alternate" hreflang="en" href="https://castlelli.github.io/physics/duffing/en/">
+  <link rel="preload" href="../fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../style.css?v=4">
+  <script>
+    // Applies a saved theme before first paint.
+    try { const saved = localStorage.getItem("theme"); if (saved) document.documentElement.dataset.theme = saved; } catch (error) {}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#lab">Skip to the lab</a>
+
+  <header class="nav">
+    <a class="back" href="../../" aria-label="Back to the physics projects"><span aria-hidden="true">←</span><span class="back-label">Physics</span></a>
+    <a class="brand" href="#topo">Duffing <span>PME3100</span></a>
+    <nav aria-label="Sections">
+      <a href="#lab">Lab</a>
+      <a href="#borboleta">Sensitivity</a>
+      <a href="#atrator">Attractor</a>
+      <a href="#bifurcacao">Bifurcation</a>
+      <a href="#bacias">Basins</a>
+      <a href="#precisao">Accuracy</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="button ghost" href="../" hreflang="pt-BR" lang="pt-BR" aria-label="Português">PT</a>
+      <a class="button ghost" href="https://github.com/castlelli/physics/blob/main/duffing/resultado/optativa9-17864509.pdf">PDF report</a>
+      <button class="button ghost" type="button" data-theme-toggle aria-label="Switch between light and dark theme">Theme</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="topo">
+      <div class="hero-text">
+        <p class="eyebrow">PME3100 Mechanics I, Optional assignment 9</p>
+        <h1>The Duffing oscillator, <em>live</em></h1>
+        <p class="lede">Runge-Kutta integration, in your browser. Change the data and watch chaos appear.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#lab">Open the lab</a>
+          <a class="button" href="https://github.com/castlelli/physics/blob/main/duffing/resultado/optativa9-17864509.pdf">PDF report</a>
+        </div>
+      </div>
+      <figure class="hero-figure">
+        <canvas id="hero-cloud" aria-label="Sixty thousand trajectories of case C, integrated in real time, drawing the strange attractor"></canvas>
+        <figcaption>60,000 trajectories of case C, integrated right now. Each point is a different block.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="lab" style="--trace: var(--case-a)">
+      <div class="section-head">
+        <h2>Lab</h2>
+        <p>The block, the spring and the forcing from the problem, integrated while you watch. The dots mark the state once every forcing period: the Poincaré section.</p>
+      </div>
+
+      <div class="case-bar" data-case-bar role="group" aria-label="Data sets"></div>
+      <p class="case-note" data-case-note></p>
+
+      <div class="lab-grid">
+        <aside class="panel controls">
+          <div data-controls></div>
+          <div class="transport">
+            <button class="button primary" type="button" data-play>Pause</button>
+            <button class="button" type="button" data-reset>Reset</button>
+            <button class="button" type="button" data-listen>Listen to x(t)</button>
+          </div>
+          <p class="status" data-status role="status"></p>
+        </aside>
+
+        <div class="lab-views">
+          <div class="lab-row top">
+            <figure class="panel mech">
+              <figcaption>Block and energy well</figcaption>
+              <canvas id="lab-mech" aria-label="Block with spring and damper, and the ball in the potential energy well"></canvas>
+            </figure>
+            <figure class="panel">
+              <figcaption>Phase space <span>click to choose the start</span></figcaption>
+              <canvas id="lab-phase" class="pickable" aria-label="Phase space, velocity against position"></canvas>
+            </figure>
+          </div>
+          <div class="lab-row">
+            <figure class="panel">
+              <figcaption>Position</figcaption>
+              <canvas id="lab-x" aria-label="Position x over time"></canvas>
+            </figure>
+            <figure class="panel">
+              <figcaption>Velocity</figcaption>
+              <canvas id="lab-v" aria-label="Velocity over time"></canvas>
+            </figure>
+          </div>
+          <dl class="readout">
+            <div><dt>t [s]</dt><dd data-readout="t">0</dd></div>
+            <div><dt>x [m]</dt><dd data-readout="x">0</dd></div>
+            <div><dt>ẋ [m/s]</dt><dd data-readout="v">0</dd></div>
+            <div><dt>energy [J]</dt><dd data-readout="e">0</dd></div>
+            <div><dt>step h [s]</dt><dd data-readout="h">0</dd></div>
+            <div><dt>regime</dt><dd data-readout="regime">–</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="borboleta">
+      <div class="section-head">
+        <h2>Two almost identical starts</h2>
+        <p>Two blocks in steady state, a tiny distance apart. In chaos the distance grows exponentially, and the mean slope of the line is the Lyapunov exponent.</p>
+      </div>
+      <div class="toolbar">
+        <div class="segmented" data-butterfly-case role="group" aria-label="Data used"></div>
+        <label class="select">Initial separation
+          <select data-butterfly-eps>
+            <option value="1e-6">10⁻⁶ m</option>
+            <option value="1e-9" selected>10⁻⁹ m</option>
+            <option value="1e-12">10⁻¹² m</option>
+          </select>
+        </label>
+        <button class="button primary" type="button" data-butterfly-run>Release both blocks</button>
+      </div>
+      <div class="pair">
+        <figure class="panel">
+          <figcaption>Position of both blocks</figcaption>
+          <canvas id="butterfly-x" aria-label="Position of both trajectories over time"></canvas>
+        </figure>
+        <figure class="panel">
+          <figcaption>Distance between the blocks <span>log scale</span></figcaption>
+          <canvas id="butterfly-d" aria-label="Distance between both trajectories, on a log scale"></canvas>
+        </figure>
+      </div>
+      <dl class="tiles" data-butterfly-tiles>
+        <div><dt>Separation rate measured now</dt><dd data-tile="slope">–</dd><p data-tile="slope-note">Release the blocks to measure.</p></div>
+        <div><dt>λ₁ in the report</dt><dd data-tile="report">–</dd><p data-tile="report-note"></p></div>
+        <div><dt>Time until this pair is 0.1 m apart</dt><dd data-tile="horizon">–</dd><p data-tile="horizon-note"></p></div>
+      </dl>
+    </section>
+
+    <section class="section split" id="atrator">
+      <div class="split-text">
+        <h2>The strange attractor, phase by phase</h2>
+        <p>Photograph 60,000 blocks at the same instant of the forcing cycle and they fall onto a fractal figure. Advance the phase and the figure stretches and folds over itself, which is how chaos mixes trajectories.</p>
+        <div class="slider-block">
+          <label for="cloud-phase">Forcing phase <output data-cloud-phase-label>0.00 T</output></label>
+          <input id="cloud-phase" type="range" min="0" max="199" step="1" value="0">
+        </div>
+        <div class="toolbar tight">
+          <button class="button primary" type="button" data-cloud-play>Spin the phase</button>
+          <button class="button" type="button" data-cloud-lab>Use the lab data</button>
+          <button class="button" type="button" data-cloud-reset>Back to case C</button>
+        </div>
+        <p class="footnote" data-cloud-note></p>
+      </div>
+      <figure class="panel square">
+        <canvas id="cloud" aria-label="Stroboscopic section of 60,000 trajectories"></canvas>
+      </figure>
+    </section>
+
+    <section class="section" id="bifurcacao">
+      <div class="section-head">
+        <h2>From order to chaos, by changing the forcing</h2>
+        <p>Each column shows where the block is, once per period, for one forcing amplitude A. A few points: periodic motion. A smear: chaos. Click any amplitude to take it to the lab.</p>
+      </div>
+      <div class="toolbar">
+        <div class="segmented" data-bif-view role="group" aria-label="Amplitude range">
+          <button type="button" data-view="full" aria-pressed="true">Full range</button>
+          <button type="button" data-view="zoom" aria-pressed="false">Period-5 window</button>
+        </div>
+      </div>
+      <figure class="panel chart-host" data-bif-host>
+        <canvas id="bif-map" class="pickable" aria-label="Bifurcation diagram: stroboscopic position against forcing amplitude"></canvas>
+        <canvas id="bif-lyap" class="pickable" aria-label="Largest Lyapunov exponent against forcing amplitude"></canvas>
+      </figure>
+    </section>
+
+    <section class="section" id="bacias">
+      <div class="section-head">
+        <h2>Where each start ends up</h2>
+        <p>Each point of the map is an initial condition, coloured by the destination the report computed. Click a point: the browser integrates the trajectory and checks the result.</p>
+      </div>
+      <div class="toolbar">
+        <div class="segmented" data-basin-tabs role="group" aria-label="Basin map">
+          <button type="button" data-basin="E" aria-pressed="true">Case E: two wells</button>
+          <button type="button" data-basin="A" aria-pressed="false">Case A: cycle phase</button>
+          <button type="button" data-basin="A_zoom" aria-pressed="false">Case A magnified</button>
+          <button type="button" data-basin="B" aria-pressed="false">Case B: unforced</button>
+        </div>
+      </div>
+      <div class="basin-grid">
+        <figure class="panel square">
+          <canvas id="basin" class="pickable" aria-label="Map of basins of attraction in the plane of initial conditions"></canvas>
+        </figure>
+        <div class="basin-side">
+          <p class="basin-about" data-basin-about></p>
+          <ul class="legend" data-basin-legend></ul>
+          <dl class="result" data-basin-result>
+            <div><dt>Start</dt><dd data-basin-out="start">click the map</dd></div>
+            <div><dt>Destination predicted by the map</dt><dd data-basin-out="map">–</dd></div>
+            <div><dt>Destination integrated now</dt><dd data-basin-out="live">–</dd></div>
+            <div><dt>Check</dt><dd data-basin-out="check">–</dd></div>
+          </dl>
+          <button class="button" type="button" data-basin-lab disabled>Open this start in the lab</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="precisao">
+      <div class="section-head">
+        <h2>The browser checks the report</h2>
+        <p>Nothing here is a pre-rendered figure. The Runge-Kutta error falls with the fourth power of the step, and the report's measurements are redone on your machine.</p>
+      </div>
+      <div class="precision-grid">
+        <div>
+          <figure class="panel chart-host" data-conv-host>
+            <figcaption>Error at t = 20 s against the step h <span>case C, log scales</span></figcaption>
+            <canvas id="conv" aria-label="Global RK4 error against the step, on a log-log scale"></canvas>
+          </figure>
+          <div class="slider-block">
+            <label for="conv-h">Test step <output data-conv-label></output></label>
+            <input id="conv-h" type="range" min="0" max="100" step="1" value="55">
+          </div>
+          <p class="footnote" data-conv-note></p>
+        </div>
+        <div class="check">
+          <table>
+            <caption>Report measurements redone in the browser</caption>
+            <thead><tr><th scope="col">Measurement</th><th scope="col">Report</th><th scope="col">Browser</th><th scope="col">Difference</th></tr></thead>
+            <tbody data-check-rows></tbody>
+          </table>
+          <div class="toolbar tight">
+            <button class="button primary" type="button" data-check-run>Recompute now</button>
+            <span class="status" data-check-status role="status"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Vinicius Castelli, NUSP 17864509. PME3100 Mechanics I, Escola Politécnica da USP, 2026.</p>
+    <p>
+      <a href="https://github.com/castlelli/physics/blob/main/duffing/resultado/optativa9-17864509.pdf">PDF report</a>
+      <a href="https://github.com/castlelli/physics/tree/main/duffing">Python code</a>
+      <a href="https://github.com/castlelli/physics/tree/main/docs/duffing">Code of this site</a>
+    </p>
+  </footer>
+
+  <script type="module" src="../js/main.js?v=5"></script>
+</body>
+</html>

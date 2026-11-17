@@ -6,10 +6,11 @@ import { createBasins } from "./basins.js";
 import { createPrecision } from "./precision.js";
 import { fmt, invalidateTheme, reducedMotion, theme } from "./ui.js";
 import { STEPS_PER_PERIOD } from "./model.js";
+import { T, dataUrl } from "./i18n.js";
 
 function setupTheme() {
   const toggle = document.querySelector("[data-theme-toggle]");
-  const label = () => (toggle.textContent = theme().dark ? "Tema claro" : "Tema escuro");
+  const label = () => (toggle.textContent = theme().dark ? T.themeLight : T.themeDark);
   toggle.addEventListener("click", () => {
     const next = theme().dark ? "light" : "dark";
     document.documentElement.dataset.theme = next;
@@ -43,7 +44,7 @@ function setupAttractor(report, seed, lab) {
     color: () => (caseKey ? theme().cases[caseKey] : theme().free),
   });
   const describe = (text) => (note.textContent = text);
-  const syncPlay = () => (play.textContent = cloud.isPlaying() ? "Parar" : "Girar a fase");
+  const syncPlay = () => (play.textContent = cloud.isPlaying() ? T.stop : T.spinPhase);
 
   cloud.onPhase((phase) => {
     slider.value = String(phase);
@@ -60,29 +61,29 @@ function setupAttractor(report, seed, lab) {
   });
   root.querySelector("[data-cloud-lab]").addEventListener("click", () => {
     const snapshot = lab.snapshot();
-    if (!(snapshot.params.omega > 0)) return describe("Estes dados não têm força periódica para marcar a fase.");
+    if (!(snapshot.params.omega > 0)) return describe(T.noForcing);
     caseKey = snapshot.caseKey;
     cloud.setSystem(snapshot.params);
     cloud.setPlaying(true);
     syncPlay();
-    describe("Os 60 mil blocos partem espalhados pela janela e caem sobre os atratores dos dados do laboratório. Se sobrarem poucos pontos, o movimento é periódico.");
+    describe(T.cloudLab);
   });
   root.querySelector("[data-cloud-reset]").addEventListener("click", () => {
     caseKey = "C";
     cloud.setSystem(caseC, seed);
     cloud.setPlaying(false);
     syncPlay();
-    describe("Caso C: k₁ = −1 N/m, A = 0,50 N. Os pontos de partida vêm do relatório; a evolução é calculada aqui.");
+    describe(T.cloudC);
   });
-  describe("Caso C: k₁ = −1 N/m, A = 0,50 N. Os pontos de partida vêm do relatório; a evolução é calculada aqui.");
+  describe(T.cloudC);
   slider.style.setProperty("--fill", "0%");
 }
 
 async function main() {
   setupTheme();
   const [report, seedBuffer] = await Promise.all([
-    fetch("data/report.json").then((response) => response.json()),
-    fetch("data/attractor_c.bin").then((response) => response.arrayBuffer()),
+    fetch(dataUrl("report.json")).then((response) => response.json()),
+    fetch(dataUrl("attractor_c.bin")).then((response) => response.arrayBuffer()),
   ]);
   const seed = new Float32Array(seedBuffer);
 

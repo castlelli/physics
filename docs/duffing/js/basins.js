@@ -2,35 +2,28 @@
 
 import { coefficients, nearestPoint, rk4Step, strobe } from "./model.js";
 import { Plot, fmt, hexToRgb, onResize, onThemeChange, pointerPosition, reducedMotion, theme, watchVisibility } from "./ui.js";
+import { T, dataUrl } from "./i18n.js";
 
 const DRAW_SECONDS = 2.6;
 
 const MAPS = {
   E: {
     caseKey: "E",
-    about: "Força fraca (A = 0,20 N): cada poço guarda a sua órbita de período 1. A fronteira entre as bacias é lisa, então só partidas vizinhas dela mudam de destino.",
-    classes: ["órbita do poço direito", "órbita do poço esquerdo"],
     palette: ["C", "A"],
     pathPeriods: 14,
   },
   A: {
     caseKey: "A",
-    about: "No caso A todas as partidas chegam ao mesmo ciclo de período 5. O que muda é o atraso: a cor diz em qual dos cinco pontos do ciclo o bloco está depois de 160 períodos. As cores se entrelaçam em uma fronteira fractal.",
-    classes: ["ponto 1", "ponto 2", "ponto 3", "ponto 4", "ponto 5"],
     palette: ["A", "B", "C", "D", "E"],
     pathPeriods: 20,
   },
   A_zoom: {
     caseKey: "A",
-    about: "A mesma figura ampliada 13 vezes. A fronteira não fica mais simples: perto dela, mudar a partida no terceiro dígito já troca o destino.",
-    classes: ["ponto 1", "ponto 2", "ponto 3", "ponto 4", "ponto 5"],
     palette: ["A", "B", "C", "D", "E"],
     pathPeriods: 20,
   },
   B: {
     caseKey: "B",
-    about: "Sem força o bloco para em x = −1 ou x = +1. As duas bacias se enrolam em espiral em torno da origem, separadas pela variedade estável da sela.",
-    classes: ["repouso em x = −1", "repouso em x = +1"],
     palette: ["A", "C"],
     pathPeriods: 0,
   },
@@ -50,7 +43,7 @@ export async function createBasins(report, lab) {
   await Promise.all(
     Object.keys(MAPS).map(async (key) => {
       const image = new Image();
-      image.src = `data/${report.basins[key].file}`;
+      image.src = dataUrl(report.basins[key].file);
       await image.decode();
       const scratch = document.createElement("canvas");
       scratch.width = image.naturalWidth;
@@ -219,12 +212,12 @@ export async function createBasins(report, lab) {
     const v0 = v0w + (row / (size - 1)) * (v1w - v0w);
     const predicted = values[(size - 1 - row) * size + column];
     const { index, path } = classify(x0, v0);
-    const names = MAPS[key].classes;
+    const names = T.basins[key].classes;
     shot = { x0, v0, path, progress: reducedMotion() ? 1 : 0, started: performance.now() };
-    out.start.textContent = `(${fmt(x0, 4)}; ${fmt(v0, 4)})`;
-    out.map.textContent = names[predicted] ?? "sem classe";
-    out.live.textContent = names[index] ?? "não convergiu";
-    out.check.textContent = predicted === index ? "igual ao relatório" : "diferente: fronteira sensível ao último dígito";
+    out.start.textContent = `(${fmt(x0, 4)}${T.pointSeparator}${fmt(v0, 4)})`;
+    out.map.textContent = names[predicted] ?? T.noClass;
+    out.live.textContent = names[index] ?? T.notConverged;
+    out.check.textContent = predicted === index ? T.same : T.different;
     openInLab.disabled = false;
     draw();
   }
@@ -233,9 +226,9 @@ export async function createBasins(report, lab) {
     key = next;
     stale = true;
     shot = null;
-    about.textContent = MAPS[key].about;
-    legend.innerHTML = MAPS[key].classes.map((name, index) => `<li><i style="--swatch: var(--case-${MAPS[key].palette[index].toLowerCase()})"></i>${name}</li>`).join("");
-    out.start.textContent = "clique no mapa";
+    about.textContent = T.basins[key].about;
+    legend.innerHTML = T.basins[key].classes.map((name, index) => `<li><i style="--swatch: var(--case-${MAPS[key].palette[index].toLowerCase()})"></i>${name}</li>`).join("");
+    out.start.textContent = T.clickMap;
     out.map.textContent = out.live.textContent = out.check.textContent = "–";
     openInLab.disabled = true;
     for (const button of root.querySelectorAll("[data-basin-tabs] button")) button.setAttribute("aria-pressed", String(button.dataset.basin === key));

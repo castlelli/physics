@@ -1,6 +1,7 @@
 // Bifurcation diagram (precomputed in Python) with the largest Lyapunov exponent underneath.
 
 import { Plot, createTooltip, fmt, hexToRgb, offsetWithin, onResize, onThemeChange, pointerPosition, theme, trimmed } from "./ui.js";
+import { T, dataUrl } from "./i18n.js";
 
 const BASE = { m: 1, k1: -1, k2: 1, c: 0.3, omega: 1.2 };
 
@@ -11,11 +12,11 @@ export async function createBifurcation(report, lab) {
   const lyapCanvas = root.querySelector("#bif-lyap");
   const tooltip = createTooltip(host);
   const margin = { left: 52, right: 16 };
-  const mapPlot = new Plot(mapCanvas, { yLabel: "x a cada período [m]", margin: { ...margin, top: 30, bottom: 8 }, xTickFormat: () => "", xTicks: 9 });
-  const lyapPlot = new Plot(lyapCanvas, { xLabel: "amplitude da força A [N]", yLabel: "λ₁ [1/s], com a área sombreada onde há caos (λ₁ > 0)", margin: { ...margin, top: 8, bottom: 36 }, yTicks: 3, xTicks: 9 });
+  const mapPlot = new Plot(mapCanvas, { yLabel: T.strobeAxis, margin: { ...margin, top: 30, bottom: 8 }, xTickFormat: () => "", xTicks: 9 });
+  const lyapPlot = new Plot(lyapCanvas, { xLabel: T.amplitudeAxis, yLabel: T.lyapAxis, margin: { ...margin, top: 8, bottom: 36 }, yTicks: 3, xTicks: 9 });
   const buffer = document.createElement("canvas");
 
-  const load = async (name) => new Uint16Array(await (await fetch(`data/${name}`)).arrayBuffer());
+  const load = async (name) => new Uint16Array(await (await fetch(dataUrl(name))).arrayBuffer());
   const [full, zoom] = await Promise.all([load("bifurcation.bin"), load("bifurcation_zoom.bin")]);
   const views = {
     full: { ...report.bifurcation, values: full, yRange: [-1.6, 1.6] },
@@ -67,10 +68,10 @@ export async function createBifurcation(report, lab) {
   function markers() {
     const colors = theme();
     const list = [
-      { gamma: report.cases.E.A, label: "caso E", color: colors.cases.E },
-      { gamma: report.cases.A.A, label: "caso A", color: colors.cases.A },
-      { gamma: report.cases.C.A, label: "caso C", color: colors.cases.C },
-      { gamma: report.numbers.melnikov, label: "limiar de Melnikov", color: null },
+      { gamma: report.cases.E.A, label: T.caseWord("E"), color: colors.cases.E },
+      { gamma: report.cases.A.A, label: T.caseWord("A"), color: colors.cases.A },
+      { gamma: report.cases.C.A, label: T.caseWord("C"), color: colors.cases.C },
+      { gamma: report.numbers.melnikov, label: T.melnikov, color: null },
     ];
     return list.filter((item) => item.gamma >= view.gamma[0] && item.gamma <= view.gamma[1]);
   }
@@ -88,7 +89,7 @@ export async function createBifurcation(report, lab) {
         ctx.fillStyle = colors.ink2;
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
-        ctx.fillText(`órbita de período 5 estável: ${fmt(lo, 4)} a ${fmt(hi, 4)} N`, plot.px((lo + hi) / 2), top - 8);
+        ctx.fillText(T.window(fmt(lo, 4), fmt(hi, 4)), plot.px((lo + hi) / 2), top - 8);
       }
     }
     for (const item of markers()) {
@@ -172,9 +173,9 @@ export async function createBifurcation(report, lab) {
     if (px < plot.inner.left || px > plot.inner.left + plot.inner.width) return onLeave();
     hover = indexAt(plot.invX(px));
     const lambda = view.lyapunov[hover];
-    const kind = lambda > 0.005 ? "caos" : "periódico";
+    const kind = lambda > 0.005 ? T.chaos : T.periodic;
     const [left, top] = offsetWithin(host, canvas);
-    tooltip.show(left + px, top + py, `A = <b>${fmt(gammaAt(hover), 4)} N</b><br>λ₁ = <b>${fmt(lambda, 3)} 1/s</b> (${kind})<br>clique para abrir no laboratório`);
+    tooltip.show(left + px, top + py, `A = <b>${fmt(gammaAt(hover), 4)} N</b><br>λ₁ = <b>${fmt(lambda, 3)} 1/s</b> (${kind})<br>${T.clickToLab}`);
     draw();
   }
 
